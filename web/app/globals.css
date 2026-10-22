@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+/* A clinic's calm palette: soft paper, deep teal-blue for what is booked, amber for what is held. The full set of
+   tokens grows with the screens (days 7-8). */
+@theme {
+	--color-paper: #f5f7f8;
+	--color-card: #ffffff;
+	--color-ink: #17212b;
+	--color-muted: #5f6b76;
+	--color-line: #dde3e8;
+	--color-brand: #155e75;
+	--color-brand-dark: #0e4a5c;
+	--color-brand-soft: #e2f1f5;
+
+	--font-sans: ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+body {
+	background: var(--color-paper);
+	color: var(--color-ink);
+	font-family: var(--font-sans);
+}

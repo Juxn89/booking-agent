@@ -1,0 +1,18 @@
+packages:
+  - '.'
+
+# No dependency runs install scripts. unrs-resolver (ESLint's import resolver) ships prebuilt binaries.
+allowBuilds:
+  unrs-resolver: false
+
+# The repo's rule, enforced by pnpm: no version younger than two weeks (in minutes).
+minimumReleaseAge: 20160
+
+# Security exception to the two-week rule (22 Oct 2026): Next.js 16.0.0-16.4.0 is affected by
+# GHSA-2464-fhr4-w9xw (critical, unauthenticated RCE in the image optimizer with SVG files) and
+# GHSA-p3m5-59mp-jv5r (high, DoS through Server Actions). The fix, 16.4.2, came out on 15 Oct. Remove these
+# entries once it is two weeks old (29 Oct).
+minimumReleaseAgeExclude:
+  - next
+  - '@next/*'
+  - eslint-config-next

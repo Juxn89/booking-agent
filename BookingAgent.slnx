@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/BookingAgent.Api/BookingAgent.Api.csproj" />
+    <Project Path="src/BookingAgent.AppHost/BookingAgent.AppHost.csproj" />
+    <Project Path="src/BookingAgent.Application/BookingAgent.Application.csproj" />
+    <Project Path="src/BookingAgent.Domain/BookingAgent.Domain.csproj" />
+    <Project Path="src/BookingAgent.Infrastructure/BookingAgent.Infrastructure.csproj" />
+    <Project Path="src/BookingAgent.ServiceDefaults/BookingAgent.ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/BookingAgent.Application.Tests/BookingAgent.Application.Tests.csproj" />
+    <Project Path="tests/BookingAgent.Architecture.Tests/BookingAgent.Architecture.Tests.csproj" />
+    <Project Path="tests/BookingAgent.Domain.Tests/BookingAgent.Domain.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<RootNamespace>BookingAgent.Domain.Tests</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\BookingAgent.Domain\BookingAgent.Domain.csproj" />
+	</ItemGroup>
+</Project>

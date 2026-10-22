@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\BookingAgent.Api\BookingAgent.Api.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="TngTech.ArchUnitNET" />
+		<PackageReference Include="TngTech.ArchUnitNET.xUnit" />
+	</ItemGroup>
+</Project>

@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<!-- Plain C# plus NodaTime, and nothing else, by rule (AGENTS.md): time is this domain. -->
+	<PropertyGroup>
+		<RootNamespace>BookingAgent.Domain</RootNamespace>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="NodaTime" />
+	</ItemGroup>
+</Project>

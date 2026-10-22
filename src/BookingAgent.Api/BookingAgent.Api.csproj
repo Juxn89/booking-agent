@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+	<PropertyGroup>
+		<UserSecretsId>booking-agent-api</UserSecretsId>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\BookingAgent.Infrastructure\BookingAgent.Infrastructure.csproj" />
+		<ProjectReference Include="..\BookingAgent.ServiceDefaults\BookingAgent.ServiceDefaults.csproj" />
+	</ItemGroup>
+</Project>

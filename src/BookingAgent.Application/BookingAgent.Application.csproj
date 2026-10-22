@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<ItemGroup>
+		<ProjectReference Include="..\BookingAgent.Domain\BookingAgent.Domain.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- Ports only: the adapters (EF Core, Anthropic, SMTP) live in Infrastructure. -->
+		<PackageReference Include="Microsoft.Extensions.Options" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+	</ItemGroup>
+</Project>
