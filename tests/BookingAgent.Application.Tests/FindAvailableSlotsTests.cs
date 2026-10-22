@@ -2,6 +2,7 @@ namespace BookingAgent.Application.Tests;
 
 using BookingAgent.Application.Common;
 using BookingAgent.Application.Features.Availability;
+using BookingAgent.Domain;
 using BookingAgent.Domain.Scheduling;
 using NodaTime;
 using NodaTime.Testing;
@@ -22,6 +23,7 @@ public sealed class FindAvailableSlotsTests
 		var zone = DateTimeZoneProviders.Tzdb["America/Managua"];
 		var nineThirty = zone.AtStrictly(Monday.At(new LocalTime(9, 30))).ToInstant();
 		_source.Context = new AvailabilityContext(
+			BusinessId.New(),
 			new WeeklySchedule([new WorkingHours(IsoDayOfWeek.Monday, new LocalTime(9, 0), new LocalTime(11, 0))]),
 			zone,
 			Duration.FromMinutes(30),

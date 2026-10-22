@@ -11,5 +11,6 @@
     <Project Path="tests/BookingAgent.Application.Tests/BookingAgent.Application.Tests.csproj" />
     <Project Path="tests/BookingAgent.Architecture.Tests/BookingAgent.Architecture.Tests.csproj" />
     <Project Path="tests/BookingAgent.Domain.Tests/BookingAgent.Domain.Tests.csproj" />
+    <Project Path="tests/BookingAgent.Integration.Tests/BookingAgent.Integration.Tests.csproj" />
   </Folder>
 </Solution>

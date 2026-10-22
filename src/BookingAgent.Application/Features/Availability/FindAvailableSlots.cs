@@ -1,6 +1,7 @@
 namespace BookingAgent.Application.Features.Availability;
 
 using BookingAgent.Application.Common;
+using BookingAgent.Domain;
 using BookingAgent.Domain.Scheduling;
 using NodaTime;
 
@@ -12,12 +13,14 @@ using NodaTime;
 public sealed record AvailabilityQuery(Guid ProfessionalId, Guid ServiceId, LocalDate From, LocalDate To);
 
 /// <summary>What the slots of a professional and a service depend on, as stored.</summary>
+/// <param name="Business">The business the professional works for.</param>
 /// <param name="Schedule">The professional's weekly hours.</param>
 /// <param name="Zone">The business's time zone.</param>
 /// <param name="ServiceDuration">How long the service takes.</param>
-/// <param name="Busy">Bookings, live holds and time off in the period looked at.</param>
+/// <param name="Busy">Confirmed bookings, holds that have not run out and time off in the period looked at.</param>
 /// <param name="Rules">The business's granularity and minimum notice.</param>
 public sealed record AvailabilityContext(
+	BusinessId Business,
 	WeeklySchedule Schedule,
 	DateTimeZone Zone,
 	Duration ServiceDuration,

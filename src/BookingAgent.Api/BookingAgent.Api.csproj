@@ -7,4 +7,12 @@
 		<ProjectReference Include="..\BookingAgent.Infrastructure\BookingAgent.Infrastructure.csproj" />
 		<ProjectReference Include="..\BookingAgent.ServiceDefaults\BookingAgent.ServiceDefaults.csproj" />
 	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="NodaTime.Serialization.SystemTextJson" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
 </Project>

@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\BookingAgent.Api\BookingAgent.Api.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Testcontainers.PostgreSql" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
+		<PackageReference Include="NodaTime.Testing" />
+		<PackageReference Include="NodaTime.Serialization.SystemTextJson" />
+	</ItemGroup>
+</Project>
