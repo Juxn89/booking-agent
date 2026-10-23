@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<!--
+		Multi-turn evals of the assistant: 25 scripted conversations against a real Postgres (Testcontainers),
+		scored on the database and the recorded steps. `run oracle` (free, CI) scores the harness; `run claude`
+		with the allow-paid flag scores Claude Haiku 5.5. See evals/README.md.
+	-->
+	<PropertyGroup>
+		<OutputType>Exe</OutputType>
+		<RootNamespace>BookingAgent.Evals</RootNamespace>
+		<InvariantGlobalization>true</InvariantGlobalization>
+		<!-- The scenario records are only ever created by the JSON deserializer. -->
+		<NoWarn>$(NoWarn);CA1812</NoWarn>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!-- The same runner, tools and storage the API uses; only the model and the clock are swapped. -->
+		<ProjectReference Include="..\..\src\BookingAgent.Infrastructure\BookingAgent.Infrastructure.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="NodaTime.Testing" />
+		<PackageReference Include="Testcontainers.PostgreSql" />
+	</ItemGroup>
+</Project>

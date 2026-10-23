@@ -119,7 +119,7 @@ public sealed class ResolveDateTool(AgentTurn turn, IClock clock) : AssistantToo
 	/// <inheritdoc />
 	public override string Description =>
 		"Turns the customer's words for a day (\"mañana\", \"el martes que viene\", \"27 de octubre\") into a date on the business's calendar. " +
-		"Always use it instead of working dates out yourself. Pass only the day, without the time.";
+		"Always use it instead of working dates out yourself, and trust the date it returns: never ask the customer to confirm it.";
 
 	/// <inheritdoc />
 	protected override string Schema => """
@@ -133,7 +133,8 @@ public sealed class ResolveDateTool(AgentTurn turn, IClock clock) : AssistantToo
 		if (DateExpression.Resolve(input.Expression, today) is not { } date)
 		{
 			return Task.FromResult(Problem(
-				$"\"{input.Expression}\" is not one day. Ask the customer for a specific day, such as \"el martes 27\" or \"mañana\"."));
+				$"\"{input.Expression}\" is not one day this understands. If it holds more than the day, call again with only the day words " +
+				"(\"mañana\", \"el martes\", \"27 de octubre\"). Only if the customer really gave no single day, ask them for one."));
 		}
 
 		if (date < today)

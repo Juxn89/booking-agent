@@ -35,6 +35,9 @@ So far:
 - **Chat** (`/chat`): the conversation with the held slot as a card under the assistant's message, with its
   countdown and the Confirmar button. The prompt keeps the assistant to booking: no medical advice, no other
   topics, and the customer's words are never instructions.
+- **Evals** ([`evals/`](evals/README.md)): 25 multi-turn conversations against a real Postgres, scored on the
+  database. Claude Haiku 5.5 holds the right slot in 25/25, confirms none, never holds a time no tool offered, and
+  costs USD 0.0022 per conversation; an oracle run checks the harness in CI for free.
 - **Booking form** (`/reservar`): service, professional, day and time, then the held slot with a countdown and a
   Confirmar button. It calls the same API as the assistant will. The inbox is at `/bandeja`.
 - **Demo data:** "Clínica Demo" in Managua with three professionals and five services, seeded in Development.
@@ -45,6 +48,7 @@ So far:
 cp .env.template .env                               # once; add an Anthropic key for the assistant (optional)
 dotnet run --project src/BookingAgent.AppHost       # Postgres, Mailpit (http://localhost:8030), API and web (http://localhost:3020)
 dotnet test                                         # domain, application, architecture and integration (needs Docker)
+dotnet run --project evals/BookingAgent.Evals -- run oracle   # the evals' harness (needs Docker)
 ```
 
 Rules for contributors and agents are in [`AGENTS.md`](AGENTS.md).

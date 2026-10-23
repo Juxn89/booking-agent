@@ -1,6 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
 		<RootNamespace>BookingAgent.Domain.Tests</RootNamespace>
+		<!--
+			As in a container without ICU: the domain must not depend on culture data. Found by the evals, where
+			"mañana" stopped resolving because Normalize(FormD) has no data to decompose with in this mode.
+		-->
+		<InvariantGlobalization>true</InvariantGlobalization>
 	</PropertyGroup>
 
 	<ItemGroup>

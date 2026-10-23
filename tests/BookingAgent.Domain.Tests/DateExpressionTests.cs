@@ -31,6 +31,14 @@ public sealed class DateExpressionTests
 	[InlineData("27/10", "2026-10-27")]
 	[InlineData("3/11/2026", "2026-11-03")]
 	[InlineData("2026-12-01", "2026-12-01")]
+	[InlineData("mañana a las 8", "2026-10-24")]
+	[InlineData("el viernes a las 16", "2026-10-30")]
+	[InlineData("el jueves en la tarde, a las 5", "2026-10-29")]
+	[InlineData("el miércoles a las 3 de la tarde", "2026-10-28")]
+	[InlineData("pasado mañana 16:30", "2026-10-25")]
+	[InlineData("el 12 de noviembre a las 14:30", "2026-11-12")]
+	[InlineData("mañana temprano", "2026-10-24")]
+	[InlineData("el sábado por la mañana", "2026-10-24")]
 	public void Spanish_day_expressions_resolve_on_the_business_calendar(string text, string expected)
 	{
 		Assert.Equal(LocalDate.FromDateTime(DateTime.Parse(expected, System.Globalization.CultureInfo.InvariantCulture)), DateExpression.Resolve(text, Friday));

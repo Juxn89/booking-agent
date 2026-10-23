@@ -29,6 +29,9 @@ jobs:
       # Every test project, the integration tests included: they start Postgres with Testcontainers on the
       # runner's Docker.
       - run: dotnet test -c Release --no-build
+      # The evals' harness, scored with the oracle (no model, no key, no cost): it must come out perfect. The
+      # paid run with Claude is manual (evals/README.md).
+      - run: dotnet run --project evals/BookingAgent.Evals -c Release --no-build -- run oracle
 
   web:
     name: Web (lint, types, build)

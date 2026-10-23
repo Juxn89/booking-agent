@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/evals/">
+    <Project Path="evals/BookingAgent.Evals/BookingAgent.Evals.csproj" />
+  </Folder>
   <Folder Name="/src/">
     <Project Path="src/BookingAgent.Api/BookingAgent.Api.csproj" />
     <Project Path="src/BookingAgent.AppHost/BookingAgent.AppHost.csproj" />

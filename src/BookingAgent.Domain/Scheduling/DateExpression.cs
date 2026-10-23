@@ -7,7 +7,7 @@ using NodaTime;
 
 /// <summary>
 /// Turns what a customer writes for a day ("mañana", "el martes que viene", "27 de octubre") into a date on the
-/// business's calendar. The server does this, never the model: a model that adds days to a date in its head gets
+/// business's calendar. A time after the day ("a las 8", "en la tarde") is ignored. The server does this, never the model: a model that adds days to a date in its head gets
 /// it wrong often enough to book the wrong day. Spanish only, like the demo business.
 /// </summary>
 /// <remarks>
@@ -139,14 +139,22 @@ public static partial class DateExpression
 	// Lower case, no accents, single spaces, no trailing punctuation, no filler words in front.
 	private static string Normalize(string? text)
 	{
-		var decomposed = (text ?? string.Empty).Trim().ToLowerInvariant().Normalize(NormalizationForm.FormD);
-		var plain = new StringBuilder(decomposed.Length);
-		foreach (var c in decomposed)
+		// Spanish accents spelled out rather than decomposed with Normalize(FormD), which needs culture data that a
+		// container in invariant mode does not have (found by the evals: "mañana" stopped resolving).
+		var lower = (text ?? string.Empty).Trim().ToLowerInvariant();
+		var plain = new StringBuilder(lower.Length);
+		foreach (var c in lower)
 		{
-			if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+			plain.Append(c switch
 			{
-				plain.Append(c);
-			}
+				'á' or 'à' or 'ä' => 'a',
+				'é' or 'è' or 'ë' => 'e',
+				'í' or 'ì' or 'ï' => 'i',
+				'ó' or 'ò' or 'ö' => 'o',
+				'ú' or 'ù' or 'ü' => 'u',
+				'ñ' => 'n',
+				_ => c,
+			});
 		}
 
 		var result = Spaces().Replace(plain.ToString(), " ").Trim().TrimEnd('.', ',', '?', '!');
@@ -158,8 +166,17 @@ public static partial class DateExpression
 			}
 		}
 
+		// The time is not the day: "mañana a las 8", "el jueves en la tarde, a las 5", "pasado mañana 16:30".
+		for (var stripped = TrailingTime().Replace(result, string.Empty); stripped != result; stripped = TrailingTime().Replace(result, string.Empty))
+		{
+			result = stripped.TrimEnd(',', ' ');
+		}
+
 		return result;
 	}
+
+	[GeneratedRegex(@",?\s*(?:(?:a|para|como a|sobre) (?:la|las) \d{1,2}(?::\d{2})?(?:\s*(?:am|pm|hrs?|horas))?(?: de la (?:manana|tarde|noche))?|(?:en|por|de) la (?:manana|tarde|noche)|temprano|a(?:l)? mediodia|\d{1,2}:\d{2}(?:\s*(?:am|pm|hrs?|horas))?)$")]
+	private static partial Regex TrailingTime();
 
 	[GeneratedRegex(@"\s+")]
 	private static partial Regex Spaces();
