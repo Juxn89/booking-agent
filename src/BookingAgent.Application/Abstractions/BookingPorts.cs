@@ -53,7 +53,11 @@ public interface IBookingRepository
 	/// <param name="customer">The customer.</param>
 	void Add(Customer customer);
 
-	/// <summary>Saves everything staged and changed, in one transaction.</summary>
+	/// <summary>
+	/// Saves everything staged and changed, in one transaction, together with the notifications the bookings'
+	/// changes call for (<see cref="Features.Notifications.NotificationPlanner"/>): a confirmation is never saved
+	/// without its notice, and a notice never outlives a save that failed.
+	/// </summary>
 	/// <param name="cancellationToken">Cancellation.</param>
 	/// <returns>A task.</returns>
 	/// <exception cref="Common.SlotTakenException">The period overlaps a booking another request saved first.</exception>

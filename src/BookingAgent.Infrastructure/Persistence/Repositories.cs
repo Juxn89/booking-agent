@@ -3,6 +3,7 @@ namespace BookingAgent.Infrastructure.Persistence;
 using BookingAgent.Application.Abstractions;
 using BookingAgent.Application.Common;
 using BookingAgent.Application.Features.Availability;
+using BookingAgent.Application.Features.Notifications;
 using BookingAgent.Domain;
 using BookingAgent.Domain.Bookings;
 using BookingAgent.Domain.Catalog;
@@ -96,6 +97,13 @@ internal sealed class BookingRepository(BookingDbContext db) : IBookingRepositor
 
 	public async Task SaveChangesAsync(CancellationToken cancellationToken)
 	{
+		// The outbox: the notifications go in with the change they announce, or not at all.
+		var changed = db.ChangeTracker.Entries<Booking>()
+			.Select(static entry => entry.Entity)
+			.Where(static booking => booking.Changes.Count > 0)
+			.ToList();
+		db.Notifications.AddRange(changed.SelectMany(static booking => booking.Changes).SelectMany(NotificationPlanner.Plan));
+
 		try
 		{
 			await SaveSerializedAsync(cancellationToken).ConfigureAwait(false);
@@ -110,6 +118,11 @@ internal sealed class BookingRepository(BookingDbContext db) : IBookingRepositor
 			// The failed rows stay tracked; whatever this unit of work does next must start clean.
 			db.ChangeTracker.Clear();
 			throw new SlotTakenException("The period overlaps a booking saved a moment before.", exception);
+		}
+
+		foreach (var booking in changed)
+		{
+			booking.ClearChanges();
 		}
 	}
 

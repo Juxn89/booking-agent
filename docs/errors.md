@@ -3,6 +3,11 @@
 Every error is an RFC 9457 Problem Details response with a stable `code`; the `type` links here. Codes are dotted:
 the area, then what went wrong.
 
+## Catalog
+
+### catalog-not_found
+`catalog.not_found` · 404. No business with that id.
+
 ## Availability
 
 ### availability-bad_date
@@ -49,3 +54,9 @@ be free.
 ### booking-changed
 `booking.changed` · 409. The booking changed while the request was handled, e.g. a hold was released at the
 moment it was confirmed. Asking again sees the new state.
+
+## Inbox
+
+### inbox-invalid_email
+`inbox.invalid_email` · 400. The in-app inbox is read by the email the booking was made with; what was given is not
+one. (Development only until customers sign in with a code.)

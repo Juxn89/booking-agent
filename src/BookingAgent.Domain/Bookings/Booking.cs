@@ -73,6 +73,8 @@ public sealed class Booking
 	/// <summary>Random bytes in a confirmation token: 256 bits, unguessable.</summary>
 	public const int TokenBytes = 32;
 
+	private readonly List<BookingChanged> _changes = [];
+
 	private Booking(
 		BookingId id,
 		ProfessionalId professionalId,
@@ -134,6 +136,12 @@ public sealed class Booking
 
 	/// <summary>When a reschedule: the confirmed booking this one replaces once confirmed.</summary>
 	public BookingId? Replaces { get; private set; }
+
+	/// <summary>The changes since it was loaded that the customer must be told about; not stored.</summary>
+	public IReadOnlyList<BookingChanged> Changes => _changes;
+
+	/// <summary>Forgets the recorded changes, once they have been turned into notifications and saved.</summary>
+	public void ClearChanges() => _changes.Clear();
 
 	/// <summary>Holds a slot for <paramref name="holdFor"/>.</summary>
 	/// <param name="professionalId">With whom.</param>
@@ -202,6 +210,7 @@ public sealed class Booking
 
 		Status = BookingStatus.Confirmed;
 		ConfirmedAt = now;
+		_changes.Add(new BookingChanged(Id, Replaces is null ? BookingChange.Confirmed : BookingChange.Rescheduled, Period, now));
 		return ConfirmOutcome.Confirmed;
 	}
 
@@ -234,6 +243,12 @@ public sealed class Booking
 		if (Status == BookingStatus.Confirmed && now > Period.Start - cutoff)
 		{
 			return CancelOutcome.TooLate;
+		}
+
+		// Releasing a hold tells nobody anything: there was no appointment yet.
+		if (Status == BookingStatus.Confirmed)
+		{
+			_changes.Add(new BookingChanged(Id, BookingChange.Cancelled, Period, now));
 		}
 
 		CancelAs(Bookings.CancellationReason.ByCustomer, now);

@@ -36,7 +36,12 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapDefaultEndpoints();
+app.MapCatalogEndpoints();
 app.MapBookingEndpoints();
+if (app.Environment.IsDevelopment())
+{
+	app.MapDevelopmentInbox();
+}
 
 await app.RunAsync();
 

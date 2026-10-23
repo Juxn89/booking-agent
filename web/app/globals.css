@@ -11,6 +11,10 @@
 	--color-brand: #155e75;
 	--color-brand-dark: #0e4a5c;
 	--color-brand-soft: #e2f1f5;
+	--color-held: #b45309;
+	--color-held-soft: #fef3c7;
+	--color-danger: #b91c1c;
+	--color-danger-soft: #fdecec;
 
 	--font-sans: ui-sans-serif, system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }

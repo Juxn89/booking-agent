@@ -18,14 +18,21 @@ So far:
 - **No double booking:** a Postgres exclusion constraint on `(professional_id, period)`, with new bookings of a
   professional saved one at a time; fifty simultaneous requests for one slot give one hold and forty-nine 409s
   in about a second ([ADR 0001](docs/adr/0001-no-double-booking-in-postgres.md)).
-- **API:** `GET /v1/professionals/{id}/availability`, `POST /v1/holds`, `POST /v1/holds/{id}/confirm`. Errors
-  are Problem Details with a stable code ([`docs/errors.md`](docs/errors.md)).
+- **Notifications through an outbox:** confirming, moving or cancelling a booking writes its notices in the same
+  transaction: one at once, and reminders a day and two hours before. A dispatcher sends them by email (Mailpit in
+  local runs) and to an in-app inbox, retrying failures with a growing wait. A reminder for a booking that is no
+  longer on is skipped ([ADR 0004](docs/adr/0004-notifications-through-an-outbox.md)).
+- **API:** `GET /v1/businesses/{id}/catalog`, `GET /v1/professionals/{id}/availability`, `POST /v1/holds`,
+  `POST /v1/holds/{id}/confirm`; in Development, `GET /v1/dev/inbox?email=`. Errors are Problem Details with a
+  stable code ([`docs/errors.md`](docs/errors.md)).
+- **Booking form** (`/reservar`): service, professional, day and time, then the held slot with a countdown and a
+  Confirmar button. It calls the same API as the assistant will. The inbox is at `/bandeja`.
 - **Demo data:** "Clínica Demo" in Managua with three professionals and five services, seeded in Development.
 - **AppHost** (.NET Aspire): Postgres 18, Mailpit, the API and the web app.
 
 ```bash
 (cd web && pnpm install)                            # once
-dotnet run --project src/BookingAgent.AppHost       # Postgres, Mailpit, API and web (http://localhost:3020)
+dotnet run --project src/BookingAgent.AppHost       # Postgres, Mailpit (http://localhost:8030), API and web (http://localhost:3020)
 dotnet test                                         # domain, application, architecture and integration (needs Docker)
 ```
 

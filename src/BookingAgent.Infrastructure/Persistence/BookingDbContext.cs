@@ -3,12 +3,16 @@ namespace BookingAgent.Infrastructure.Persistence;
 using BookingAgent.Domain;
 using BookingAgent.Domain.Bookings;
 using BookingAgent.Domain.Catalog;
+using BookingAgent.Domain.Notifications;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.DependencyInjection;
 
-/// <summary>The database: the catalog (businesses, services, professionals and their hours) and the bookings.</summary>
+/// <summary>
+/// The database: the catalog (businesses, services, professionals and their hours), the bookings, the outbox of
+/// notifications and the in-app inbox.
+/// </summary>
 /// <param name="options">The options.</param>
 public sealed class BookingDbContext(DbContextOptions<BookingDbContext> options) : DbContext(options)
 {
@@ -32,6 +36,12 @@ public sealed class BookingDbContext(DbContextOptions<BookingDbContext> options)
 
 	/// <summary>Bookings.</summary>
 	public DbSet<Booking> Bookings => Set<Booking>();
+
+	/// <summary>The outbox: notifications waiting to be sent, and what became of the others.</summary>
+	public DbSet<Notification> Notifications => Set<Notification>();
+
+	/// <summary>The in-app inbox.</summary>
+	public DbSet<InboxMessage> Inbox => Set<InboxMessage>();
 
 	/// <inheritdoc />
 	protected override void OnModelCreating(ModelBuilder modelBuilder)

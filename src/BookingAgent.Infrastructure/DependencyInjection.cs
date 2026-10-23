@@ -3,6 +3,9 @@ namespace BookingAgent.Infrastructure;
 using BookingAgent.Application.Abstractions;
 using BookingAgent.Application.Features.Availability;
 using BookingAgent.Application.Features.Bookings;
+using BookingAgent.Application.Features.Catalog;
+using BookingAgent.Application.Features.Notifications;
+using BookingAgent.Infrastructure.Notifications;
 using BookingAgent.Infrastructure.Persistence;
 using BookingAgent.Infrastructure.Processing;
 using Microsoft.Extensions.Configuration;
@@ -33,9 +36,16 @@ public static class DependencyInjection
 
 		AddOptions<BookingOptions>(services, configuration, BookingOptions.SectionName);
 		AddOptions<SweeperOptions>(services, configuration, SweeperOptions.SectionName);
+		AddOptions<NotificationOptions>(services, configuration, NotificationOptions.SectionName);
+		AddOptions<SmtpOptions>(services, configuration, SmtpOptions.SectionName);
 
 		services.AddScoped<IAvailabilitySource, AvailabilitySource>();
 		services.AddScoped<IBookingRepository, BookingRepository>();
+		services.AddScoped<ICatalogReader, CatalogReader>();
+		services.AddScoped<INotificationOutbox, NotificationOutbox>();
+		services.AddScoped<IInboxReader, InboxReader>();
+		services.AddScoped<INotificationChannel, SmtpEmailChannel>();
+		services.AddScoped<INotificationChannel, InAppChannel>();
 
 		services.AddScoped<FindAvailableSlots>();
 		services.AddScoped<HoldSlot>();
@@ -43,8 +53,12 @@ public static class DependencyInjection
 		services.AddScoped<CancelBooking>();
 		services.AddScoped<RescheduleBooking>();
 		services.AddScoped<ExpireHolds>();
+		services.AddScoped<GetCatalog>();
+		services.AddScoped<ReadInbox>();
+		services.AddScoped<DispatchNotifications>();
 
 		services.AddHostedService<HoldSweeper>();
+		services.AddHostedService<NotificationDispatcher>();
 		return services;
 	}
 

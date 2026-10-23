@@ -23,6 +23,7 @@ var api = builder.AddProject<Projects.BookingAgent_Api>("api")
 	.WaitFor(database)
 	.WithEnvironment("Smtp__Host", mailpit.GetEndpoint("smtp").Property(EndpointProperty.Host))
 	.WithEnvironment("Smtp__Port", mailpit.GetEndpoint("smtp").Property(EndpointProperty.Port))
+	.WithEnvironment("Smtp__Security", "None")
 	.WithHttpHealthCheck("/health");
 
 // The model is called only when the developer's environment has a key, passed on as a secret parameter.

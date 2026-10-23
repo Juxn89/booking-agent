@@ -280,6 +280,111 @@ namespace BookingAgent.Infrastructure.Persistence.Migrations
                     b.ToTable("time_off", (string)null);
                 });
 
+            modelBuilder.Entity("BookingAgent.Domain.Notifications.InboxMessage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Body")
+                        .IsRequired()
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasColumnName("body");
+
+                    b.Property<Guid>("BookingId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("booking_id");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("customer_id");
+
+                    b.Property<Instant>("ReceivedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("received_at");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("subject");
+
+                    b.HasKey("Id")
+                        .HasName("pk_inbox_messages");
+
+                    b.HasIndex("BookingId")
+                        .HasDatabaseName("ix_inbox_messages_booking_id");
+
+                    b.HasIndex("CustomerId", "ReceivedAt")
+                        .HasDatabaseName("ix_inbox_messages_customer_id_received_at");
+
+                    b.ToTable("inbox_messages", (string)null);
+                });
+
+            modelBuilder.Entity("BookingAgent.Domain.Notifications.Notification", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer")
+                        .HasColumnName("attempts");
+
+                    b.Property<Guid>("BookingId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("booking_id");
+
+                    b.Property<string>("Channel")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("channel");
+
+                    b.Property<string>("Detail")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("detail");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("kind");
+
+                    b.Property<Instant>("NextAttemptAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("next_attempt_at");
+
+                    b.Property<Instant>("ScheduledFor")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("scheduled_for");
+
+                    b.Property<Instant?>("SentAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("sent_at");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id")
+                        .HasName("pk_notifications");
+
+                    b.HasIndex("BookingId")
+                        .HasDatabaseName("ix_notifications_booking_id");
+
+                    b.HasIndex("NextAttemptAt")
+                        .HasDatabaseName("ix_notifications_due")
+                        .HasFilter("status = 'Pending'");
+
+                    b.ToTable("notifications", (string)null);
+                });
+
             modelBuilder.Entity("BookingAgent.Domain.Bookings.Booking", b =>
                 {
                     b.HasOne("BookingAgent.Domain.Catalog.Customer", null)
@@ -387,6 +492,33 @@ namespace BookingAgent.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_time_off_professionals_professional_id");
+                });
+
+            modelBuilder.Entity("BookingAgent.Domain.Notifications.InboxMessage", b =>
+                {
+                    b.HasOne("BookingAgent.Domain.Bookings.Booking", null)
+                        .WithMany()
+                        .HasForeignKey("BookingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_inbox_messages_bookings_booking_id");
+
+                    b.HasOne("BookingAgent.Domain.Catalog.Customer", null)
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_inbox_messages_customers_customer_id");
+                });
+
+            modelBuilder.Entity("BookingAgent.Domain.Notifications.Notification", b =>
+                {
+                    b.HasOne("BookingAgent.Domain.Bookings.Booking", null)
+                        .WithMany()
+                        .HasForeignKey("BookingId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_notifications_bookings_booking_id");
                 });
 #pragma warning restore 612, 618
         }

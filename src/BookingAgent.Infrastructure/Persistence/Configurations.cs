@@ -3,6 +3,7 @@ namespace BookingAgent.Infrastructure.Persistence;
 using BookingAgent.Domain;
 using BookingAgent.Domain.Bookings;
 using BookingAgent.Domain.Catalog;
+using BookingAgent.Domain.Notifications;
 using BookingAgent.Domain.Scheduling;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -21,6 +22,12 @@ internal static class Columns
 	public const int TokenHash = 64;
 
 	public const string Money = "numeric(10,2)";
+
+	// Room for a subject line built from a service name and a date.
+	public const int Subject = 300;
+
+	// A rendered notification: a few sentences.
+	public const int Body = 4000;
 }
 
 internal sealed class BusinessConfiguration : IEntityTypeConfiguration<Business>
@@ -126,5 +133,42 @@ internal sealed class BookingConfiguration : IEntityTypeConfiguration<Booking>
 
 		// A hold confirmed while the sweeper expires it: one of the two saves must lose.
 		builder.Property<uint>(RowVersion).IsRowVersion();
+
+		// Turned into notifications when saved, never stored.
+		builder.Ignore(b => b.Changes);
+	}
+}
+
+internal sealed class NotificationConfiguration : IEntityTypeConfiguration<Notification>
+{
+	public void Configure(EntityTypeBuilder<Notification> builder)
+	{
+		builder.HasKey(n => n.Id);
+		builder.HasOne<Booking>().WithMany().HasForeignKey(n => n.BookingId);
+		builder.Property(n => n.Channel).HasConversion<string>().HasMaxLength(Columns.Enum);
+		builder.Property(n => n.Kind).HasConversion<string>().HasMaxLength(Columns.Enum);
+		builder.Property(n => n.Status).HasConversion<string>().HasMaxLength(Columns.Enum);
+		builder.Property(n => n.Detail).HasMaxLength(Notification.MaxDetailLength);
+
+		// The dispatcher's query: pending, due first. Sent and skipped rows stay out of the index.
+		builder.HasIndex(n => n.NextAttemptAt).HasFilter("status = 'Pending'").HasDatabaseName("ix_notifications_due");
+		builder.HasIndex(n => n.BookingId);
+	}
+}
+
+internal sealed class InboxMessageConfiguration : IEntityTypeConfiguration<InboxMessage>
+{
+	public void Configure(EntityTypeBuilder<InboxMessage> builder)
+	{
+		builder.ToTable("inbox_messages");
+
+		// The notification's id: a notification delivered twice is one message.
+		builder.HasKey(m => m.Id);
+		builder.Property(m => m.Id).ValueGeneratedNever();
+		builder.HasOne<Customer>().WithMany().HasForeignKey(m => m.CustomerId);
+		builder.HasOne<Booking>().WithMany().HasForeignKey(m => m.BookingId);
+		builder.Property(m => m.Subject).HasMaxLength(Columns.Subject);
+		builder.Property(m => m.Body).HasMaxLength(Columns.Body);
+		builder.HasIndex(m => new { m.CustomerId, m.ReceivedAt });
 	}
 }
