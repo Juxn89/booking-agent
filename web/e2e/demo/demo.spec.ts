@@ -8,12 +8,15 @@ import { baseURL, latestCode, panelKey } from "../servers";
 // (playwright.demo.config.ts): the customer in the chat on the left, the clinic's panel on the right, side by side.
 // It writes the video, its poster and the screenshots to docs/demo.
 //
-// Frames come from Chromium's screencast of each page (960×1080 each), with their timestamps; ffmpeg, in a container
+// Frames come from Chromium's screencast of each page (960×1080 each, rendered at device scale 2), with their timestamps; ffmpeg, in a container
 // (pinned image, no network), lays the two streams side by side into a 1920×1080 MP4, so nothing is installed.
 
 const out = path.resolve(__dirname, "../../../docs/demo");
+// The README showcase is composed from these two, at device scale 2 (scripts/readme-assets.mjs).
+const readmeShots = path.resolve(__dirname, "../../../docs/readme/shots");
 const ffmpegImage = "jrottenberg/ffmpeg:9.0.1-ubuntu2404@sha256:7e8154ec4779d335054de5e173f1ef52032abaa12ac7416cc7f0c88f4973bd14";
 const viewport = { width: 960, height: 1080 };
+const scale = 2;
 const fps = 30;
 const email = "laura.gomez@ejemplo.com";
 
@@ -122,14 +125,15 @@ async function untilHeld(page: Page) {
 
 test("demo", async ({ browser }) => {
 	await mkdir(out, { recursive: true });
+	await mkdir(readmeShots, { recursive: true });
 	const dirs = { customer: test.info().outputPath("customer"), clinic: test.info().outputPath("clinic") };
 	for (const dir of Object.values(dirs)) {
 		await rm(dir, { recursive: true, force: true });
 		await mkdir(dir, { recursive: true });
 	}
 
-	const customer = await (await browser.newContext({ viewport, locale: "es-ES", baseURL })).newPage();
-	const clinic = await (await browser.newContext({ viewport, locale: "es-ES", baseURL })).newPage();
+	const customer = await (await browser.newContext({ viewport, deviceScaleFactor: scale, locale: "es-ES", baseURL })).newPage();
+	const clinic = await (await browser.newContext({ viewport, deviceScaleFactor: scale, locale: "es-ES", baseURL })).newPage();
 	await addOverlay(customer, "Cliente");
 	await addOverlay(clinic, "Clínica");
 
@@ -160,8 +164,11 @@ test("demo", async ({ browser }) => {
 	await type(customer, `A las 10, por favor. Soy Laura Gómez, ${email}`);
 	await untilHeld(customer);
 	await expect(clinic.getByRole("button", { name: /^10:00 Laura Gómez, Limpieza dental, apartada$/ })).toBeVisible();
+	// The poster is this moment, taken from the video: the card in the chat, the held slot in the panel.
+	const posterAt = Date.now() / 1000 + 1.5;
 	await say(customer, "Aparta el horario unos minutos, y en el panel aparece al instante, todavía sin confirmar.", 6000);
 	await shot(customer, path.join(out, "02-tarjeta.png"));
+	await shot(customer, path.join(readmeShots, "chat.png"));
 	await shot(clinic, path.join(out, "03-panel-apartada.png"));
 
 	await say(customer, "Solo la persona confirma, con el botón: el asistente no puede confirmar nada.", 3500);
@@ -178,6 +185,7 @@ test("demo", async ({ browser }) => {
 	await details.getByText("Pasos del asistente").scrollIntoViewIfNeeded();
 	await clinic.waitForTimeout(6500);
 	await shot(clinic, path.join(out, "04-traza.png"));
+	await shot(clinic, path.join(readmeShots, "panel.png"));
 	await clinic.evaluate(() => window.scrollTo({ top: 0, behavior: "smooth" }));
 
 	await customer.goto("/mis-citas");
@@ -201,7 +209,6 @@ test("demo", async ({ browser }) => {
 	await say(customer, "Agenda con asistente · .NET 10 · Claude Haiku · github.com/Juxn89/booking-agent", 5000);
 	const ended = Date.now() / 1000;
 	const [customerFrames, clinicFrames] = [await stopCustomer(), await stopClinic()];
-	await shot(clinic, path.join(out, "poster.jpg"));
 
 	// Both streams over the same span, so they stay in step side by side.
 	const start = Math.min(customerFrames[0]?.at ?? started, clinicFrames[0]?.at ?? started);
@@ -219,6 +226,14 @@ test("demo", async ({ browser }) => {
 			"-filter_complex", `[0:v]${scaled}[l];[1:v]${scaled}[r];[l][r]hstack=inputs=2,format=yuv420p`,
 			"-c:v", "libx264", "-preset", "slow", "-crf", "20", "-movflags", "+faststart",
 			"/out/demo.mp4",
+		],
+		{ stdio: "inherit" },
+	);
+	execFileSync(
+		"docker",
+		[
+			"run", "--rm", "--network", "none", "--read-only", "--tmpfs", "/tmp", "-v", `${out}:/out`, ffmpegImage,
+			"-y", "-loglevel", "error", "-ss", (posterAt - start).toFixed(2), "-i", "/out/demo.mp4", "-frames:v", "1", "-q:v", "3", "/out/poster.jpg",
 		],
 		{ stdio: "inherit" },
 	);

@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="150" viewBox="0 0 1280 150" role="img" aria-label="28 / 28 eval conversations as expected, Claude Haiku 5.5, 23 Oct 2026. 0 bookings changed by the agent, it holds; a person confirms. 1 of 50 simultaneous holds win a slot, Postgres exclusion constraint. USD 0.0024 per conversation, average of the 28 scenarios.">
+<defs>
+	<linearGradient id="brand" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#a5b4fc"/><stop offset=".6" stop-color="#4338ca"/><stop offset="1" stop-color="#f59e0b"/></linearGradient>
+	<linearGradient id="metric" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a5b4fc"/><stop offset=".55" stop-color="#4338ca"/><stop offset="1" stop-color="#f59e0b"/></linearGradient>
+	<radialGradient id="orbIndigo"><stop offset="0" stop-color="#4338ca" stop-opacity="0.15"/><stop offset="1" stop-color="#4338ca" stop-opacity="0"/></radialGradient>
+	<radialGradient id="orbAmber"><stop offset="0" stop-color="#f59e0b" stop-opacity="0.105"/><stop offset="1" stop-color="#f59e0b" stop-opacity="0"/></radialGradient>
+	<pattern id="dots" width="22" height="22" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.1" fill="#4338ca" fill-opacity="0.08"/></pattern></defs>
+<rect x=".5" y=".5" width="1279" height="149" rx="22" fill="#ffffff" stroke="#e2e3f0"/>
+
+	<g transform="translate(160 0)">
+		<text y="64" text-anchor="middle" font-family="'Segoe UI', Inter, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="40" font-weight="800" letter-spacing="-.02em" fill="url(#metric)">28 / 28</text>
+		<text y="94" text-anchor="middle" font-family="'Segoe UI', Inter, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="600" fill="#0f172a">eval conversations as expected</text>
+		<text y="116" text-anchor="middle" font-family="'Segoe UI', Inter, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" fill="#475569">Claude Haiku 5.5, 23 Oct 2026</text>
+	</g>
+	<g transform="translate(480 0)">
+		<text y="64" text-anchor="middle" font-family="'Segoe UI', Inter, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="40" font-weight="800" letter-spacing="-.02em" fill="url(#metric)">0</text>
+		<text y="94" text-anchor="middle" font-family="'Segoe UI', Inter, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="600" fill="#0f172a">bookings changed by the agent</text>
+		<text y="116" text-anchor="middle" font-family="'Segoe UI', Inter, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" fill="#475569">it holds; a person confirms</text>
+	</g><line x1="320" y1="36" x2="320" y2="114" stroke="#e2e3f0"/>
+	<g transform="translate(800 0)">
+		<text y="64" text-anchor="middle" font-family="'Segoe UI', Inter, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="40" font-weight="800" letter-spacing="-.02em" fill="url(#metric)">1 of 50</text>
+		<text y="94" text-anchor="middle" font-family="'Segoe UI', Inter, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="600" fill="#0f172a">simultaneous holds win a slot</text>
+		<text y="116" text-anchor="middle" font-family="'Segoe UI', Inter, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" fill="#475569">Postgres exclusion constraint</text>
+	</g><line x1="640" y1="36" x2="640" y2="114" stroke="#e2e3f0"/>
+	<g transform="translate(1120 0)">
+		<text y="64" text-anchor="middle" font-family="'Segoe UI', Inter, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="40" font-weight="800" letter-spacing="-.02em" fill="url(#metric)">USD 0.0024</text>
+		<text y="94" text-anchor="middle" font-family="'Segoe UI', Inter, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="16" font-weight="600" fill="#0f172a">per conversation</text>
+		<text y="116" text-anchor="middle" font-family="'Segoe UI', Inter, -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="13.5" fill="#475569">average of the 28 scenarios</text>
+	</g><line x1="960" y1="36" x2="960" y2="114" stroke="#e2e3f0"/>
+</svg>

@@ -6,7 +6,7 @@ the right. It was recorded on 23 Oct 2026 against Claude Haiku 5.5, as is: the a
 | File | Shows |
 |---|---|
 | `demo.mp4` | The whole flow: a request in plain Spanish, the times on offer, a held slot that appears in the panel at once, the customer's Confirmar, the steps behind the booking, sign-in with the emailed code, and a cancellation that frees the slot live |
-| `poster.jpg` | The video's poster: the panel at the end |
+| `poster.jpg` | The video's poster, taken from it: the held slot as a card on the left and in the panel on the right |
 | `01-chat.png` | The assistant offering free times for "el lunes en la mañana" |
 | `02-tarjeta.png` | The held slot as a card, with its countdown and the Confirmar button |
 | `03-panel-apartada.png` | The panel with the held booking, marked IA, before it is confirmed |
