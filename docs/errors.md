@@ -75,6 +75,10 @@ Start a new one, or use the booking form.
 `assistant.unavailable` · 503. The assistant cannot answer: there is no API key, the model call failed, or the day's
 budget (`Assistant:DailyBudgetUsd`) is spent. The booking form keeps working.
 
+### assistant-too_many_requests
+`assistant.too_many_requests` · 429. More than `AssistantRateLimit:PermitsPerMinute` (10) messages in a minute from one
+visitor. `Retry-After` says when to write again.
+
 ## Inbox
 
 ### inbox-invalid_email

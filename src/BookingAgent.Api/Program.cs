@@ -17,6 +17,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 	options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 builder.Services.AddInfrastructure(builder.Configuration);
+builder.Services.AddAssistantRateLimit(builder.Configuration);
 
 var app = builder.Build();
 
@@ -28,6 +29,8 @@ app.UseExceptionHandler(new ExceptionHandlerOptions
 		: StatusCodes.Status500InternalServerError,
 });
 app.UseStatusCodePages();
+app.UseForwardedHeaders();
+app.UseRateLimiter();
 
 if (app.Environment.IsDevelopment())
 {

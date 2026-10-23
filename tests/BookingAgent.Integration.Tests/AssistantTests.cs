@@ -10,6 +10,7 @@ using BookingAgent.Domain.Assistant;
 using BookingAgent.Domain.Bookings;
 using BookingAgent.Infrastructure.Ai;
 using BookingAgent.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
@@ -212,6 +213,29 @@ public sealed class AssistantTests(PostgresFixture fixture) : IAsyncLifetime
 		Assert.Equal(AssistantErrors.Unavailable, (await noKey.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("code").GetString());
 		Assert.Equal(HttpStatusCode.BadRequest, empty.StatusCode);
 		Assert.Equal(HttpStatusCode.NotFound, unknown.StatusCode);
+	}
+
+	[Fact]
+	public async Task A_visitor_writing_faster_than_a_person_is_told_to_wait()
+	{
+		await using var api = fixture.Api.WithWebHostBuilder(static host => host.UseSetting("AssistantRateLimit:PermitsPerMinute", "2"));
+		using var client = api.CreateClient();
+		var url = new Uri($"/v1/businesses/{DemoData.Clinic.Value}/assistant/messages", UriKind.Relative);
+
+		var statuses = new List<HttpStatusCode>();
+		for (var i = 0; i < 3; i++)
+		{
+			using var response = await client.PostAsJsonAsync(url, new { conversationId = (Guid?)null, message = "Hola" });
+			statuses.Add(response.StatusCode);
+			if (response.StatusCode == HttpStatusCode.TooManyRequests)
+			{
+				Assert.Equal("assistant.too_many_requests", (await response.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("code").GetString());
+				Assert.Equal("60", response.Headers.RetryAfter?.Delta?.TotalSeconds.ToString(CultureInfo.InvariantCulture));
+			}
+		}
+
+		// Without a key the first two are 503s, but they still count: the limit is on asking, not on answers.
+		Assert.Equal([HttpStatusCode.ServiceUnavailable, HttpStatusCode.ServiceUnavailable, HttpStatusCode.TooManyRequests], statuses);
 	}
 
 	[Fact]

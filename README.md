@@ -30,7 +30,11 @@ So far:
   ("el martes que viene"), check availability and hold a slot. None of them can confirm: the hold's token goes to
   the widget's card, never to the model ([ADR 0005](docs/adr/0005-tools-are-adapters-over-the-use-cases.md)). The
   tools are declared `strict`, the history stays on the server, and every model and tool call is recorded with its
-  tokens and cost. Spending is capped per reply (8 model calls), per conversation (USD 0.05) and per day.
+  tokens and cost. Spending is capped per reply (8 model calls), per conversation (USD 0.05) and per day, and
+  each visitor may send 10 messages a minute.
+- **Chat** (`/chat`): the conversation with the held slot as a card under the assistant's message, with its
+  countdown and the Confirmar button. The prompt keeps the assistant to booking: no medical advice, no other
+  topics, and the customer's words are never instructions.
 - **Booking form** (`/reservar`): service, professional, day and time, then the held slot with a countdown and a
   Confirmar button. It calls the same API as the assistant will. The inbox is at `/bandeja`.
 - **Demo data:** "Clínica Demo" in Managua with three professionals and five services, seeded in Development.
@@ -38,6 +42,7 @@ So far:
 
 ```bash
 (cd web && pnpm install)                            # once
+cp .env.template .env                               # once; add an Anthropic key for the assistant (optional)
 dotnet run --project src/BookingAgent.AppHost       # Postgres, Mailpit (http://localhost:8030), API and web (http://localhost:3020)
 dotnet test                                         # domain, application, architecture and integration (needs Docker)
 ```

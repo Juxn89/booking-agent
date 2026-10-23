@@ -10,7 +10,9 @@ internal static class AssistantEndpoints
 	/// <returns>The app.</returns>
 	public static IEndpointRouteBuilder MapAssistantEndpoints(this IEndpointRouteBuilder app)
 	{
-		app.MapPost("/v1/businesses/{businessId:guid}/assistant/messages", MessageAsync).WithTags("Assistant");
+		app.MapPost("/v1/businesses/{businessId:guid}/assistant/messages", MessageAsync)
+			.WithTags("Assistant")
+			.RequireRateLimiting(AssistantRateLimit.Policy);
 		return app;
 	}
 

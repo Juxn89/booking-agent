@@ -20,6 +20,7 @@ internal static class ResultMapping
 			ErrorKind.NotFound => StatusCodes.Status404NotFound,
 			ErrorKind.Conflict => StatusCodes.Status409Conflict,
 			ErrorKind.Unavailable => StatusCodes.Status503ServiceUnavailable,
+			ErrorKind.TooManyRequests => StatusCodes.Status429TooManyRequests,
 			_ => StatusCodes.Status500InternalServerError,
 		};
 

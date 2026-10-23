@@ -14,6 +14,9 @@ public enum ErrorKind
 
 	/// <summary>The service cannot answer now, e.g. no model is configured or the day's budget is spent: 503.</summary>
 	Unavailable = 3,
+
+	/// <summary>The caller is sending too much, too fast: 429.</summary>
+	TooManyRequests = 4,
 }
 
 /// <summary>An expected failure: something the caller can act on. Bugs are exceptions, not errors.</summary>
@@ -48,6 +51,12 @@ public sealed record Error(string Code, string Message, ErrorKind Kind, IReadOnl
 	/// <param name="message">The message.</param>
 	/// <returns>The error.</returns>
 	public static Error Unavailable(string code, string message) => new(code, message, ErrorKind.Unavailable);
+
+	/// <summary>A 429.</summary>
+	/// <param name="code">The code.</param>
+	/// <param name="message">The message.</param>
+	/// <returns>The error.</returns>
+	public static Error TooManyRequests(string code, string message) => new(code, message, ErrorKind.TooManyRequests);
 }
 
 /// <summary>A value or an <see cref="Error"/>.</summary>

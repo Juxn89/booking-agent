@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { ApiError, api, type Booking, type Catalog, type Hold, type Slot } from "@/lib/api";
 import { formatDay, formatPrice, formatTime, todayIn, zoneCity } from "@/lib/format";
+import { HoldCard } from "../ui/HoldCard";
 import { Notice } from "../ui/Notice";
 
 type Phase = { name: "form" } | { name: "held"; hold: Hold } | { name: "confirmed"; booking: Booking };
@@ -166,7 +167,8 @@ export function BookingForm() {
 	if (phase.name === "held") {
 		return (
 			<HoldCard
-				hold={phase.hold}
+				expiresAt={phase.hold.booking.holdExpiresAt}
+				localStart={phase.hold.booking.localStart}
 				summary={`${service?.name} con ${professional?.name}`}
 				city={city}
 				busy={busy}
@@ -319,64 +321,6 @@ export function BookingForm() {
 				</fieldset>
 			)}
 		</form>
-	);
-}
-
-function HoldCard({
-	hold,
-	summary,
-	city,
-	busy,
-	onConfirm,
-	onChange,
-}: {
-	hold: Hold;
-	summary: string;
-	city: string;
-	busy: boolean;
-	onConfirm: () => void;
-	onChange: () => void;
-}) {
-	const expiresAt = hold.booking.holdExpiresAt ? Date.parse(hold.booking.holdExpiresAt) : 0;
-	const [now, setNow] = useState(() => Date.now());
-	useEffect(() => {
-		const timer = setInterval(() => setNow(Date.now()), 1000);
-		return () => clearInterval(timer);
-	}, []);
-	const left = Math.max(0, Math.ceil((expiresAt - now) / 1000));
-	const expired = left === 0;
-
-	return (
-		<section className="rounded-xl border border-held bg-card p-6 shadow-sm sm:p-8" aria-live="polite">
-			<p className="text-sm font-medium uppercase tracking-wide text-held">Horario apartado</p>
-			<h2 className="mt-1 text-xl font-semibold">{summary}</h2>
-			<p className="mt-2 text-muted">
-				{formatDay(hold.booking.localStart)}, {formatTime(hold.booking.localStart)} (hora de {city}).
-			</p>
-			<p className="mt-4 rounded-lg bg-held-soft px-3 py-2 text-sm">
-				{expired
-					? "La reserva temporal venció y el horario quedó libre de nuevo."
-					: `Lo guardamos para ti ${Math.floor(left / 60)}:${String(left % 60).padStart(2, "0")} min más. Confírmalo para que sea tuyo.`}
-			</p>
-			<div className="mt-6 flex flex-wrap gap-3">
-				<button
-					type="button"
-					onClick={onConfirm}
-					disabled={busy || expired}
-					className="rounded-lg bg-brand px-5 py-2.5 font-medium text-white transition-colors hover:bg-brand-dark disabled:opacity-60"
-				>
-					{busy ? "Confirmando…" : "Confirmar cita"}
-				</button>
-				<button
-					type="button"
-					onClick={onChange}
-					disabled={busy}
-					className="rounded-lg border border-line px-5 py-2.5 font-medium transition-colors hover:bg-brand-soft"
-				>
-					Cambiar
-				</button>
-			</div>
-		</section>
 	);
 }
 

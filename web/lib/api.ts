@@ -28,6 +28,18 @@ export type Booking = {
 
 export type Hold = { booking: Booking; confirmationToken: string };
 
+// A slot the assistant held: the card shows it, and only its token (never seen by the model) confirms it.
+export type HeldByAssistant = {
+	holdId: string;
+	confirmationToken: string;
+	serviceName: string;
+	professionalName: string;
+	localStart: string;
+	expiresAt: string;
+};
+
+export type AssistantReply = { conversationId: string; reply: string; holds: HeldByAssistant[] };
+
 export type InboxItem = { id: string; bookingId: string; subject: string; body: string; receivedAt: string };
 
 // RFC 9457 with the API's stable code (docs/errors.md) and, on a taken slot, the nearest free starts.
@@ -63,5 +75,10 @@ export const api = {
 	}) => call<Hold>("/v1/holds", { method: "POST", body: JSON.stringify(body) }),
 	confirm: (holdId: string, token: string) =>
 		call<Booking>(`/v1/holds/${holdId}/confirm`, { method: "POST", body: JSON.stringify({ token }) }),
+	send: (conversationId: string | null, message: string) =>
+		call<AssistantReply>(`/v1/businesses/${BUSINESS_ID}/assistant/messages`, {
+			method: "POST",
+			body: JSON.stringify({ conversationId, message }),
+		}),
 	inbox: (email: string) => call<InboxItem[]>(`/v1/dev/inbox?email=${encodeURIComponent(email)}`),
 };

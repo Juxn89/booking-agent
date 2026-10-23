@@ -1,5 +1,6 @@
 const int WebPort = 3020;
 const int MailpitHttpPort = 8030;
+const string AnthropicKey = "ANTHROPIC_API_KEY";
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -26,8 +27,9 @@ var api = builder.AddProject<Projects.BookingAgent_Api>("api")
 	.WithEnvironment("Smtp__Security", "None")
 	.WithHttpHealthCheck("/health");
 
-// The model is called only when the developer's environment has a key, passed on as a secret parameter.
-if (Environment.GetEnvironmentVariable("ANTHROPIC_API_KEY") is { Length: > 0 } key)
+// The model is called only when the developer has a key: in the environment, or in the repo's git-ignored .env
+// (see .env.template). It is passed on as a secret parameter and never printed.
+if ((Environment.GetEnvironmentVariable(AnthropicKey) ?? DotEnv(Path.Combine(builder.AppHostDirectory, "..", "..", ".env"), AnthropicKey)) is { Length: > 0 } key)
 {
 	api.WithEnvironment("Anthropic__ApiKey", builder.AddParameter("anthropic-api-key", key, secret: true));
 }
@@ -43,3 +45,13 @@ builder.AddJavaScriptApp("web", "../../web", "dev:aspire")
 	.WaitFor(api);
 
 await builder.Build().RunAsync();
+
+// KEY=value lines; blank lines and # comments skipped. Only the one variable is read.
+static string? DotEnv(string path, string name) =>
+	File.Exists(path)
+		? File.ReadLines(path)
+			.Select(static line => line.Trim())
+			.Where(line => line.StartsWith(name + "=", StringComparison.Ordinal))
+			.Select(line => line[(name.Length + 1)..].Trim().Trim('"'))
+			.LastOrDefault(static value => value.Length > 0)
+		: null;
