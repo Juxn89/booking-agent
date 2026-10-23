@@ -10,6 +10,8 @@
 		<PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.NodaTime" />
 		<PackageReference Include="EFCore.NamingConventions" />
 		<PackageReference Include="MailKit" />
+		<PackageReference Include="Anthropic" />
+		<PackageReference Include="Microsoft.Extensions.AI" />
 		<!-- BackgroundService, for the hold sweeper. -->
 		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
 		<PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" />

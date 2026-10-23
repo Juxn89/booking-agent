@@ -1,6 +1,7 @@
 namespace BookingAgent.Infrastructure.Persistence;
 
 using BookingAgent.Domain;
+using BookingAgent.Domain.Assistant;
 using BookingAgent.Domain.Bookings;
 using BookingAgent.Domain.Catalog;
 using BookingAgent.Domain.Notifications;
@@ -42,6 +43,12 @@ public sealed class BookingDbContext(DbContextOptions<BookingDbContext> options)
 
 	/// <summary>The in-app inbox.</summary>
 	public DbSet<InboxMessage> Inbox => Set<InboxMessage>();
+
+	/// <summary>Conversations with the assistant.</summary>
+	public DbSet<AgentConversation> AgentConversations => Set<AgentConversation>();
+
+	/// <summary>The steps behind each of the assistant's replies.</summary>
+	public DbSet<AgentStep> AgentSteps => Set<AgentStep>();
 
 	/// <inheritdoc />
 	protected override void OnModelCreating(ModelBuilder modelBuilder)

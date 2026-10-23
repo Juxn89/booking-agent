@@ -24,6 +24,124 @@ namespace BookingAgent.Infrastructure.Persistence.Migrations
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "btree_gist");
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("BookingAgent.Domain.Assistant.AgentConversation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("BusinessId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("business_id");
+
+                    b.Property<decimal>("CostUsd")
+                        .HasColumnType("numeric(12,6)")
+                        .HasColumnName("cost_usd");
+
+                    b.Property<string>("History")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("history");
+
+                    b.Property<long>("InputTokens")
+                        .HasColumnType("bigint")
+                        .HasColumnName("input_tokens");
+
+                    b.Property<Instant>("LastActivityAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("last_activity_at");
+
+                    b.Property<long>("OutputTokens")
+                        .HasColumnType("bigint")
+                        .HasColumnName("output_tokens");
+
+                    b.Property<Instant>("StartedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("started_at");
+
+                    b.Property<int>("Turns")
+                        .IsConcurrencyToken()
+                        .HasColumnType("integer")
+                        .HasColumnName("turns");
+
+                    b.HasKey("Id")
+                        .HasName("pk_agent_conversations");
+
+                    b.HasIndex("BusinessId")
+                        .HasDatabaseName("ix_agent_conversations_business_id");
+
+                    b.ToTable("agent_conversations", (string)null);
+                });
+
+            modelBuilder.Entity("BookingAgent.Domain.Assistant.AgentStep", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Instant>("At")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("at");
+
+                    b.Property<Guid>("ConversationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("conversation_id");
+
+                    b.Property<decimal>("CostUsd")
+                        .HasColumnType("numeric(12,6)")
+                        .HasColumnName("cost_usd");
+
+                    b.Property<string>("Input")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("input");
+
+                    b.Property<long>("InputTokens")
+                        .HasColumnType("bigint")
+                        .HasColumnName("input_tokens");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)")
+                        .HasColumnName("kind");
+
+                    b.Property<int>("LatencyMs")
+                        .HasColumnType("integer")
+                        .HasColumnName("latency_ms");
+
+                    b.Property<int>("Ordinal")
+                        .HasColumnType("integer")
+                        .HasColumnName("ordinal");
+
+                    b.Property<string>("Output")
+                        .HasColumnType("jsonb")
+                        .HasColumnName("output");
+
+                    b.Property<long>("OutputTokens")
+                        .HasColumnType("bigint")
+                        .HasColumnName("output_tokens");
+
+                    b.Property<string>("ToolName")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("tool_name");
+
+                    b.Property<int>("Turn")
+                        .HasColumnType("integer")
+                        .HasColumnName("turn");
+
+                    b.HasKey("Id")
+                        .HasName("pk_agent_steps");
+
+                    b.HasIndex("At")
+                        .HasDatabaseName("ix_agent_steps_at");
+
+                    b.HasIndex("ConversationId", "Turn", "Ordinal")
+                        .HasDatabaseName("ix_agent_steps_conversation_id_turn_ordinal");
+
+                    b.ToTable("agent_steps", (string)null);
+                });
+
             modelBuilder.Entity("BookingAgent.Domain.Bookings.Booking", b =>
                 {
                     b.Property<Guid>("Id")
@@ -383,6 +501,26 @@ namespace BookingAgent.Infrastructure.Persistence.Migrations
                         .HasFilter("status = 'Pending'");
 
                     b.ToTable("notifications", (string)null);
+                });
+
+            modelBuilder.Entity("BookingAgent.Domain.Assistant.AgentConversation", b =>
+                {
+                    b.HasOne("BookingAgent.Domain.Catalog.Business", null)
+                        .WithMany()
+                        .HasForeignKey("BusinessId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_agent_conversations_businesses_business_id");
+                });
+
+            modelBuilder.Entity("BookingAgent.Domain.Assistant.AgentStep", b =>
+                {
+                    b.HasOne("BookingAgent.Domain.Assistant.AgentConversation", null)
+                        .WithMany()
+                        .HasForeignKey("ConversationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_agent_steps_agent_conversations_conversation_id");
                 });
 
             modelBuilder.Entity("BookingAgent.Domain.Bookings.Booking", b =>

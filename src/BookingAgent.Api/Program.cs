@@ -38,6 +38,7 @@ if (app.Environment.IsDevelopment())
 app.MapDefaultEndpoints();
 app.MapCatalogEndpoints();
 app.MapBookingEndpoints();
+app.MapAssistantEndpoints();
 if (app.Environment.IsDevelopment())
 {
 	app.MapDevelopmentInbox();

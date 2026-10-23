@@ -1,12 +1,14 @@
 namespace BookingAgent.Integration.Tests;
 
 using BookingAgent.Infrastructure;
+using BookingAgent.Infrastructure.Ai;
 using BookingAgent.Infrastructure.Persistence;
 using DotNet.Testcontainers.Builders;
 using DotNet.Testcontainers.Containers;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -83,8 +85,10 @@ public sealed class PostgresFixture : IAsyncLifetime
 
 	/// <summary>The use cases on the real database, with a clock the test moves.</summary>
 	/// <param name="clock">The clock.</param>
+	/// <param name="model">The assistant's model, scripted; none configured when null.</param>
+	/// <param name="settings">Settings that override the defaults, e.g. a smaller budget.</param>
 	/// <returns>The services; each scope is one request's unit of work.</returns>
-	public ServiceProvider Services(FakeClock clock)
+	public ServiceProvider Services(FakeClock clock, IChatClient? model = null, IReadOnlyDictionary<string, string?>? settings = null)
 	{
 		var configuration = new ConfigurationBuilder()
 			.AddInMemoryCollection(new Dictionary<string, string?>
@@ -96,9 +100,15 @@ public sealed class PostgresFixture : IAsyncLifetime
 				["Smtp:Port"] = _mailpit.GetMappedPublicPort(SmtpPort).ToString(System.Globalization.CultureInfo.InvariantCulture),
 				["Smtp:Security"] = "None",
 			})
+			.AddInMemoryCollection(settings ?? new Dictionary<string, string?>())
 			.Build();
 		var services = new ServiceCollection().AddLogging().AddInfrastructure(configuration);
 		services.Replace(ServiceDescriptor.Singleton<IClock>(clock));
+		if (model is not null)
+		{
+			services.AddKeyedSingleton(AssistantPipeline.ModelKey, model);
+		}
+
 		return services.BuildServiceProvider();
 	}
 
@@ -108,7 +118,7 @@ public sealed class PostgresFixture : IAsyncLifetime
 	{
 		await using (var db = CreateContext())
 		{
-			await db.Database.ExecuteSqlRawAsync("TRUNCATE inbox_messages, notifications, bookings, customers");
+			await db.Database.ExecuteSqlRawAsync("TRUNCATE agent_steps, agent_conversations, inbox_messages, notifications, bookings, customers");
 		}
 
 		using var mailpit = new HttpClient { BaseAddress = MailpitApi };

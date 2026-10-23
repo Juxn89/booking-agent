@@ -1,15 +1,20 @@
 namespace BookingAgent.Infrastructure;
 
 using BookingAgent.Application.Abstractions;
+using BookingAgent.Application.Features.Assistant;
+using BookingAgent.Application.Features.Assistant.Tools;
 using BookingAgent.Application.Features.Availability;
 using BookingAgent.Application.Features.Bookings;
 using BookingAgent.Application.Features.Catalog;
 using BookingAgent.Application.Features.Notifications;
+using BookingAgent.Infrastructure.Ai;
 using BookingAgent.Infrastructure.Notifications;
 using BookingAgent.Infrastructure.Persistence;
 using BookingAgent.Infrastructure.Processing;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using NodaTime;
 
 /// <summary>Wires the adapters and the use cases.</summary>
@@ -38,6 +43,8 @@ public static class DependencyInjection
 		AddOptions<SweeperOptions>(services, configuration, SweeperOptions.SectionName);
 		AddOptions<NotificationOptions>(services, configuration, NotificationOptions.SectionName);
 		AddOptions<SmtpOptions>(services, configuration, SmtpOptions.SectionName);
+		AddOptions<AssistantOptions>(services, configuration, AssistantOptions.SectionName);
+		AddOptions<AnthropicOptions>(services, configuration, AnthropicOptions.SectionName);
 
 		services.AddScoped<IAvailabilitySource, AvailabilitySource>();
 		services.AddScoped<IBookingRepository, BookingRepository>();
@@ -56,6 +63,28 @@ public static class DependencyInjection
 		services.AddScoped<GetCatalog>();
 		services.AddScoped<ReadInbox>();
 		services.AddScoped<DispatchNotifications>();
+
+		// The assistant: the bare model once per app (keyed, so tests can swap it), the tool loop and the meter per
+		// request around the request's turn.
+		services.AddKeyedSingleton<IChatClient>(
+			AssistantPipeline.ModelKey,
+			static (provider, _) => AssistantPipeline.CreateModel(
+				provider.GetRequiredService<IOptions<AnthropicOptions>>().Value,
+				provider.GetRequiredService<IOptions<AssistantOptions>>().Value));
+		services.AddScoped<AgentTurn>();
+		services.AddScoped<IChatClient>(static provider => AssistantPipeline.Build(
+			provider.GetRequiredKeyedService<IChatClient>(AssistantPipeline.ModelKey),
+			provider.GetRequiredService<AgentTurn>(),
+			provider.GetRequiredService<IOptions<AssistantOptions>>().Value,
+			provider.GetRequiredService<IClock>()));
+		services.AddScoped<IConversationStore, ConversationStore>();
+		services.AddScoped<ListServicesTool>();
+		services.AddScoped<ListProfessionalsTool>();
+		services.AddScoped<ResolveDateTool>();
+		services.AddScoped<CheckAvailabilityTool>();
+		services.AddScoped<HoldSlotTool>();
+		services.AddScoped<BookingTools>();
+		services.AddScoped<AgentRunner>();
 
 		services.AddHostedService<HoldSweeper>();
 		services.AddHostedService<NotificationDispatcher>();

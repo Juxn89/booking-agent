@@ -23,6 +23,9 @@ internal static class Columns
 
 	public const string Money = "numeric(10,2)";
 
+	// Model costs: a call is a fraction of a cent, so six decimals.
+	public const string Usd = "numeric(12,6)";
+
 	// Room for a subject line built from a service name and a date.
 	public const int Subject = 300;
 

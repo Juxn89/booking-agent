@@ -25,6 +25,12 @@ So far:
 - **API:** `GET /v1/businesses/{id}/catalog`, `GET /v1/professionals/{id}/availability`, `POST /v1/holds`,
   `POST /v1/holds/{id}/confirm`; in Development, `GET /v1/dev/inbox?email=`. Errors are Problem Details with a
   stable code ([`docs/errors.md`](docs/errors.md)).
+- **The assistant** (`POST /v1/businesses/{id}/assistant/messages`): Claude Haiku 5.5 with five tools that are thin
+  adapters over the form's use cases: list services and professionals, resolve relative dates on the server
+  ("el martes que viene"), check availability and hold a slot. None of them can confirm: the hold's token goes to
+  the widget's card, never to the model ([ADR 0005](docs/adr/0005-tools-are-adapters-over-the-use-cases.md)). The
+  tools are declared `strict`, the history stays on the server, and every model and tool call is recorded with its
+  tokens and cost. Spending is capped per reply (8 model calls), per conversation (USD 0.05) and per day.
 - **Booking form** (`/reservar`): service, professional, day and time, then the held slot with a countdown and a
   Confirmar button. It calls the same API as the assistant will. The inbox is at `/bandeja`.
 - **Demo data:** "Clínica Demo" in Managua with three professionals and five services, seeded in Development.

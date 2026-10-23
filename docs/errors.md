@@ -55,6 +55,26 @@ be free.
 `booking.changed` · 409. The booking changed while the request was handled, e.g. a hold was released at the
 moment it was confirmed. Asking again sees the new state.
 
+## Assistant
+
+### assistant-invalid_message
+`assistant.invalid_message` · 400. The message is empty or longer than `Assistant:MaxMessageLength` (1000 characters).
+
+### assistant-conversation_not_found
+`assistant.conversation_not_found` · 404. No conversation with that id on this business. Start a new one by sending no
+`conversationId`.
+
+### assistant-conversation_limit
+`assistant.conversation_limit` · 409. The conversation reached its message limit (30) or its spending cap (USD 0.05).
+Start a new one, or use the booking form.
+
+### assistant-busy
+`assistant.busy` · 409. Another message of the same conversation was answered at the same moment. Send yours again.
+
+### assistant-unavailable
+`assistant.unavailable` · 503. The assistant cannot answer: there is no API key, the model call failed, or the day's
+budget (`Assistant:DailyBudgetUsd`) is spent. The booking form keeps working.
+
 ## Inbox
 
 ### inbox-invalid_email

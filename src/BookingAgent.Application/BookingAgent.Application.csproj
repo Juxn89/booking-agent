@@ -7,5 +7,10 @@
 		<!-- Ports only: the adapters (EF Core, Anthropic, SMTP) live in Infrastructure. -->
 		<PackageReference Include="Microsoft.Extensions.Options" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" />
+		<PackageReference Include="Microsoft.Extensions.AI.Abstractions" />
+	</ItemGroup>
+	<ItemGroup>
+		<!-- The assistant's prompt: Markdown in the repo, embedded so it ships with the assembly. -->
+		<EmbeddedResource Include="Features/Assistant/Prompts/*.md" />
 	</ItemGroup>
 </Project>

@@ -11,6 +11,9 @@ public enum ErrorKind
 
 	/// <summary>The request conflicts with the current state, e.g. confirming a hold that has expired: 409.</summary>
 	Conflict = 2,
+
+	/// <summary>The service cannot answer now, e.g. no model is configured or the day's budget is spent: 503.</summary>
+	Unavailable = 3,
 }
 
 /// <summary>An expected failure: something the caller can act on. Bugs are exceptions, not errors.</summary>
@@ -39,6 +42,12 @@ public sealed record Error(string Code, string Message, ErrorKind Kind, IReadOnl
 	/// <returns>The error.</returns>
 	public static Error Conflict(string code, string message, IReadOnlyDictionary<string, string>? details = null) =>
 		new(code, message, ErrorKind.Conflict, details);
+
+	/// <summary>A 503.</summary>
+	/// <param name="code">The code.</param>
+	/// <param name="message">The message.</param>
+	/// <returns>The error.</returns>
+	public static Error Unavailable(string code, string message) => new(code, message, ErrorKind.Unavailable);
 }
 
 /// <summary>A value or an <see cref="Error"/>.</summary>
