@@ -6,6 +6,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using BookingAgent.Application.Common;
 using BookingAgent.Application.Features.Assistant;
+using BookingAgent.Application.Features.Customers;
 using BookingAgent.Domain.Assistant;
 using BookingAgent.Domain.Bookings;
 using BookingAgent.Infrastructure.Ai;
@@ -32,11 +33,11 @@ public sealed class AssistantTests(PostgresFixture fixture) : IAsyncLifetime
 
 	public Task DisposeAsync() => Task.CompletedTask;
 
-	private static async Task<Result<AssistantReply>> SendAsync(ServiceProvider services, Guid? conversation, string message)
+	private static async Task<Result<AssistantReply>> SendAsync(ServiceProvider services, Guid? conversation, string message, SignedInCustomer? customer = null)
 	{
 		await using var scope = services.CreateAsyncScope();
 		return await scope.ServiceProvider.GetRequiredService<AgentRunner>()
-			.HandleAsync(DemoData.Clinic.Value, new AssistantRequest(conversation, message), CancellationToken.None);
+			.HandleAsync(DemoData.Clinic.Value, new AssistantRequest(conversation, message), customer, CancellationToken.None);
 	}
 
 	private static Func<IReadOnlyList<ChatMessage>, ChatResponse> CheckTomorrow =>
@@ -218,7 +219,7 @@ public sealed class AssistantTests(PostgresFixture fixture) : IAsyncLifetime
 	[Fact]
 	public async Task A_visitor_writing_faster_than_a_person_is_told_to_wait()
 	{
-		await using var api = fixture.Api.WithWebHostBuilder(static host => host.UseSetting("AssistantRateLimit:PermitsPerMinute", "2"));
+		await using var api = fixture.Api.WithWebHostBuilder(static host => host.UseSetting("RateLimits:AssistantPerMinute", "2"));
 		using var client = api.CreateClient();
 		var url = new Uri($"/v1/businesses/{DemoData.Clinic.Value}/assistant/messages", UriKind.Relative);
 
@@ -254,7 +255,7 @@ public sealed class AssistantTests(PostgresFixture fixture) : IAsyncLifetime
 		var request = JsonDocument.Parse(handler.Body!).RootElement;
 		Assert.Equal(("claude-haiku-5-5", 2048, "low"), (request.GetProperty("model").GetString(), request.GetProperty("max_tokens").GetInt32(), request.GetProperty("output_config").GetProperty("effort").GetString()));
 		var declared = request.GetProperty("tools").EnumerateArray().ToList();
-		Assert.Equal(["list_services", "list_professionals", "resolve_date", "check_availability", "hold_slot"], declared.Select(static t => t.GetProperty("name").GetString()));
+		Assert.Equal(["list_services", "list_professionals", "resolve_date", "check_availability", "hold_slot", "find_my_bookings", "propose_cancel", "propose_reschedule"], declared.Select(static t => t.GetProperty("name").GetString()));
 		Assert.All(declared, static t =>
 		{
 			Assert.True(t.GetProperty("strict").GetBoolean());

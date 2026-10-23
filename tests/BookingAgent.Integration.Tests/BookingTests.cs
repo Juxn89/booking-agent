@@ -154,7 +154,7 @@ public sealed class BookingTests(PostgresFixture fixture) : IAsyncLifetime
 		await using (var scope = services.CreateAsyncScope())
 		{
 			replacement = (await scope.ServiceProvider.GetRequiredService<RescheduleBooking>()
-				.HandleAsync(original.Booking.Id, NineMonday + Duration.FromHours(1), null, CancellationToken.None)).Value;
+				.HandleAsync(original.Booking.Id, NineMonday + Duration.FromHours(1), null, null, CancellationToken.None)).Value;
 		}
 
 		await using (var db = fixture.CreateContext())
@@ -184,7 +184,7 @@ public sealed class BookingTests(PostgresFixture fixture) : IAsyncLifetime
 
 		_clock.Reset(NineMonday - Duration.FromMinutes(90));
 		await using var scope = services.CreateAsyncScope();
-		var result = await scope.ServiceProvider.GetRequiredService<CancelBooking>().HandleAsync(hold.Booking.Id, CancellationToken.None);
+		var result = await scope.ServiceProvider.GetRequiredService<CancelBooking>().HandleAsync(hold.Booking.Id, null, CancellationToken.None);
 
 		Assert.Equal(BookingErrors.TooLate, result.Error!.Code);
 	}

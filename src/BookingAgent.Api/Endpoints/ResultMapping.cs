@@ -21,6 +21,7 @@ internal static class ResultMapping
 			ErrorKind.Conflict => StatusCodes.Status409Conflict,
 			ErrorKind.Unavailable => StatusCodes.Status503ServiceUnavailable,
 			ErrorKind.TooManyRequests => StatusCodes.Status429TooManyRequests,
+			ErrorKind.Unauthorized => StatusCodes.Status401Unauthorized,
 			_ => StatusCodes.Status500InternalServerError,
 		};
 

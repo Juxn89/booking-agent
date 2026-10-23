@@ -129,7 +129,7 @@ static async Task<int> RunAsync(string root, string model, Func<Scenario, Scenar
 		CultureInfo.InvariantCulture,
 		$"""
 
-		holds {report.HoldAccuracy:0.000} · confirmed by the agent {report.AgentConfirmed} · unverified holds {report.UnverifiedHolds} · conflicts {report.ConflictsHandled}/{report.Conflicts}
+		holds {report.HoldAccuracy:0.000} · changed by the agent {report.ChangedByAgent} · unverified holds {report.UnverifiedHolds} · conflicts {report.ConflictsHandled}/{report.Conflicts}
 		relative dates {report.RelativeDateAccuracy:0.000} · median tool calls {report.MedianToolCalls} · average {report.AverageCostUsd:F6} USD · total {report.TotalCostUsd:F6} USD
 		"""));
 

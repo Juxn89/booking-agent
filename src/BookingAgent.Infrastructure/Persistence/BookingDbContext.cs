@@ -4,6 +4,7 @@ using BookingAgent.Domain;
 using BookingAgent.Domain.Assistant;
 using BookingAgent.Domain.Bookings;
 using BookingAgent.Domain.Catalog;
+using BookingAgent.Domain.Customers;
 using BookingAgent.Domain.Notifications;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
@@ -49,6 +50,12 @@ public sealed class BookingDbContext(DbContextOptions<BookingDbContext> options)
 
 	/// <summary>The steps behind each of the assistant's replies.</summary>
 	public DbSet<AgentStep> AgentSteps => Set<AgentStep>();
+
+	/// <summary>Sign-in codes emailed to customers.</summary>
+	public DbSet<SignInCode> SignInCodes => Set<SignInCode>();
+
+	/// <summary>Signed-in customers' sessions.</summary>
+	public DbSet<CustomerSession> CustomerSessions => Set<CustomerSession>();
 
 	/// <inheritdoc />
 	protected override void OnModelCreating(ModelBuilder modelBuilder)

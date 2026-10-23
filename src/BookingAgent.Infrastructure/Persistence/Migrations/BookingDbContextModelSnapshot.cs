@@ -398,6 +398,104 @@ namespace BookingAgent.Infrastructure.Persistence.Migrations
                     b.ToTable("time_off", (string)null);
                 });
 
+            modelBuilder.Entity("BookingAgent.Domain.Customers.CustomerSession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("BusinessId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("business_id");
+
+                    b.Property<Instant>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("customer_id");
+
+                    b.Property<Instant?>("EndedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("ended_at");
+
+                    b.Property<Instant>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character(64)")
+                        .HasColumnName("token_hash")
+                        .IsFixedLength();
+
+                    b.HasKey("Id")
+                        .HasName("pk_customer_sessions");
+
+                    b.HasIndex("BusinessId")
+                        .HasDatabaseName("ix_customer_sessions_business_id");
+
+                    b.HasIndex("CustomerId")
+                        .HasDatabaseName("ix_customer_sessions_customer_id");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique()
+                        .HasDatabaseName("ix_customer_sessions_token_hash");
+
+                    b.ToTable("customer_sessions", (string)null);
+                });
+
+            modelBuilder.Entity("BookingAgent.Domain.Customers.SignInCode", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("BusinessId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("business_id");
+
+                    b.Property<string>("CodeHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character(64)")
+                        .HasColumnName("code_hash")
+                        .IsFixedLength();
+
+                    b.Property<Instant>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("customer_id");
+
+                    b.Property<Instant>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("expires_at");
+
+                    b.Property<int>("FailedAttempts")
+                        .HasColumnType("integer")
+                        .HasColumnName("failed_attempts");
+
+                    b.Property<Instant?>("UsedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("used_at");
+
+                    b.HasKey("Id")
+                        .HasName("pk_sign_in_codes");
+
+                    b.HasIndex("BusinessId")
+                        .HasDatabaseName("ix_sign_in_codes_business_id");
+
+                    b.HasIndex("CustomerId", "CreatedAt")
+                        .HasDatabaseName("ix_sign_in_codes_customer_id_created_at");
+
+                    b.ToTable("sign_in_codes", (string)null);
+                });
+
             modelBuilder.Entity("BookingAgent.Domain.Notifications.InboxMessage", b =>
                 {
                     b.Property<Guid>("Id")
@@ -630,6 +728,40 @@ namespace BookingAgent.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_time_off_professionals_professional_id");
+                });
+
+            modelBuilder.Entity("BookingAgent.Domain.Customers.CustomerSession", b =>
+                {
+                    b.HasOne("BookingAgent.Domain.Catalog.Business", null)
+                        .WithMany()
+                        .HasForeignKey("BusinessId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_customer_sessions_businesses_business_id");
+
+                    b.HasOne("BookingAgent.Domain.Catalog.Customer", null)
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_customer_sessions_customers_customer_id");
+                });
+
+            modelBuilder.Entity("BookingAgent.Domain.Customers.SignInCode", b =>
+                {
+                    b.HasOne("BookingAgent.Domain.Catalog.Business", null)
+                        .WithMany()
+                        .HasForeignKey("BusinessId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_sign_in_codes_businesses_business_id");
+
+                    b.HasOne("BookingAgent.Domain.Catalog.Customer", null)
+                        .WithMany()
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_sign_in_codes_customers_customer_id");
                 });
 
             modelBuilder.Entity("BookingAgent.Domain.Notifications.InboxMessage", b =>

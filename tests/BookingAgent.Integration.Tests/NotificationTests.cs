@@ -76,7 +76,7 @@ public sealed class NotificationTests(PostgresFixture fixture) : IAsyncLifetime
 
 		// Cancelled that afternoon: the notice goes out, and the two-hour reminder is skipped when it comes due.
 		_clock.Reset(NineMonday - Duration.FromHours(20));
-		Assert.True((await RunAsync(services, s => s.GetRequiredService<CancelBooking>().HandleAsync(hold.Booking.Id, CancellationToken.None))).IsSuccess);
+		Assert.True((await RunAsync(services, s => s.GetRequiredService<CancelBooking>().HandleAsync(hold.Booking.Id, null, CancellationToken.None))).IsSuccess);
 		Assert.Equal(2, (await DispatchAsync(services)).Sent);
 		_clock.Reset(NineMonday - Duration.FromHours(2));
 		Assert.Equal(new DispatchReport(Sent: 0, Skipped: 2, Retrying: 0, Failed: 0), await DispatchAsync(services));
@@ -99,7 +99,7 @@ public sealed class NotificationTests(PostgresFixture fixture) : IAsyncLifetime
 		Assert.Equal(ConfirmOutcome.Confirmed, booking.Confirm(hold.ConfirmationToken, _clock.GetCurrentInstant()));
 
 		// Meanwhile the hold is released elsewhere: the confirmation's save must lose, and its notices with it.
-		Assert.True((await RunAsync(services, s => s.GetRequiredService<CancelBooking>().HandleAsync(hold.Booking.Id, CancellationToken.None))).IsSuccess);
+		Assert.True((await RunAsync(services, s => s.GetRequiredService<CancelBooking>().HandleAsync(hold.Booking.Id, null, CancellationToken.None))).IsSuccess);
 		await Assert.ThrowsAsync<BookingChangedException>(() => repository.SaveChangesAsync(CancellationToken.None));
 
 		await using var db = fixture.CreateContext();

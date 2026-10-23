@@ -6,6 +6,7 @@ using BookingAgent.Application.Features.Assistant.Tools;
 using BookingAgent.Application.Features.Availability;
 using BookingAgent.Application.Features.Bookings;
 using BookingAgent.Application.Features.Catalog;
+using BookingAgent.Application.Features.Customers;
 using BookingAgent.Application.Features.Notifications;
 using BookingAgent.Infrastructure.Ai;
 using BookingAgent.Infrastructure.Notifications;
@@ -45,13 +46,18 @@ public static class DependencyInjection
 		AddOptions<SmtpOptions>(services, configuration, SmtpOptions.SectionName);
 		AddOptions<AssistantOptions>(services, configuration, AssistantOptions.SectionName);
 		AddOptions<AnthropicOptions>(services, configuration, AnthropicOptions.SectionName);
+		AddOptions<SignInOptions>(services, configuration, SignInOptions.SectionName);
 
 		services.AddScoped<IAvailabilitySource, AvailabilitySource>();
 		services.AddScoped<IBookingRepository, BookingRepository>();
 		services.AddScoped<ICatalogReader, CatalogReader>();
 		services.AddScoped<INotificationOutbox, NotificationOutbox>();
 		services.AddScoped<IInboxReader, InboxReader>();
+		services.AddScoped<SmtpMailer>();
 		services.AddScoped<INotificationChannel, SmtpEmailChannel>();
+		services.AddScoped<ISignInCodeSender, SmtpSignInCodeSender>();
+		services.AddScoped<ISignInStore, SignInStore>();
+		services.AddScoped<IMyBookingsReader, MyBookingsReader>();
 		services.AddScoped<INotificationChannel, InAppChannel>();
 
 		services.AddScoped<FindAvailableSlots>();
@@ -63,6 +69,10 @@ public static class DependencyInjection
 		services.AddScoped<GetCatalog>();
 		services.AddScoped<ReadInbox>();
 		services.AddScoped<DispatchNotifications>();
+		services.AddScoped<RequestSignInCode>();
+		services.AddScoped<VerifySignInCode>();
+		services.AddScoped<CustomerSessions>();
+		services.AddScoped<ListMyBookings>();
 
 		// The assistant: the bare model once per app (keyed, so tests can swap it), the tool loop and the meter per
 		// request around the request's turn.
@@ -83,6 +93,9 @@ public static class DependencyInjection
 		services.AddScoped<ResolveDateTool>();
 		services.AddScoped<CheckAvailabilityTool>();
 		services.AddScoped<HoldSlotTool>();
+		services.AddScoped<FindMyBookingsTool>();
+		services.AddScoped<ProposeCancelTool>();
+		services.AddScoped<ProposeRescheduleTool>();
 		services.AddScoped<BookingTools>();
 		services.AddScoped<AgentRunner>();
 

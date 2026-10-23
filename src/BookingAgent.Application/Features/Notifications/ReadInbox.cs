@@ -20,10 +20,7 @@ public static class InboxErrors
 	public const string InvalidEmail = "inbox.invalid_email";
 }
 
-/// <summary>
-/// The in-app inbox of a customer, by email. Until customers sign in with a code (day 7) only the development
-/// build maps it, as the in-app counterpart of Mailpit.
-/// </summary>
+/// <summary>The in-app inbox of a customer, by email; the API serves it to the signed-in customer only.</summary>
 /// <param name="inbox">The inbox.</param>
 public sealed class ReadInbox(IInboxReader inbox)
 {

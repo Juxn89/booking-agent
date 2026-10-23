@@ -19,6 +19,9 @@ internal sealed class OracleChatClient(Scenario scenario, ScenarioSet set) : ICh
 	private const string ResolveDate = "resolve_date";
 	private const string CheckAvailability = "check_availability";
 	private const string HoldSlot = "hold_slot";
+	private const string FindMyBookings = "find_my_bookings";
+	private const string ProposeCancel = "propose_cancel";
+	private const string ProposeReschedule = "propose_reschedule";
 
 	public Task<ChatResponse> GetResponseAsync(IEnumerable<ChatMessage> messages, ChatOptions? options = null, CancellationToken cancellationToken = default) =>
 		Task.FromResult(Next([.. messages]));
@@ -39,12 +42,17 @@ internal sealed class OracleChatClient(Scenario scenario, ScenarioSet set) : ICh
 			return Say("Lo siento, con eso no puedo ayudarte. ¿Quieres que te busque una cita?");
 		}
 
+		if (expect.Kind is Expectation.SignIn or Expectation.Cancel or Expectation.Move)
+		{
+			return Existing(messages, expect);
+		}
+
 		var turn = messages.Count(static m => m.Role == ChatRole.User);
 		var lastUser = messages.FindLastIndex(static m => m.Role == ChatRole.User);
 		var thisTurn = messages.Skip(lastUser + 1).ToList();
 		var dayTurn = scenario.DayTurn ?? 1;
-		var professional = Names.Professional(expect.Professional).Value.ToString();
-		var service = Names.Service(expect.Service).Value.ToString();
+		var professional = Names.Professional(expect.Professional!).Value.ToString();
+		var service = Names.Service(expect.Service!).Value.ToString();
 
 		if (turn < dayTurn)
 		{
@@ -78,7 +86,7 @@ internal sealed class OracleChatClient(Scenario scenario, ScenarioSet set) : ICh
 			return Say($"Esa hora ya no está libre. Tengo a las {string.Join(", ", alternatives)}. ¿Cuál prefieres?");
 		}
 
-		var target = Target(messages, set.At(expect.Start));
+		var target = Target(messages, set.At(expect.Start!));
 		var offered = Offered(messages);
 		if (!offered.Contains(target) && Result(thisTurn, CheckAvailability) is null)
 		{
@@ -95,6 +103,47 @@ internal sealed class OracleChatClient(Scenario scenario, ScenarioSet set) : ICh
 			["customer_email"] = scenario.Customer.Email,
 			["customer_phone"] = null,
 		});
+	}
+
+	// The customer's own appointment: find it, then propose the cancellation or the move (after checking the new day).
+	private ChatResponse Existing(List<ChatMessage> messages, Expectation expect)
+	{
+		if (Result(messages, FindMyBookings) is not { } mine)
+		{
+			return Call(FindMyBookings, []);
+		}
+
+		if (!mine.TryGetProperty("bookings", out var bookings))
+		{
+			return Say("Para ver tus citas, identifícate con el código que te enviamos por correo, aquí abajo, y vuelve a preguntarme.");
+		}
+
+		var booking = bookings.EnumerateArray().First().GetProperty("booking_id").GetString();
+		if (expect.Kind == Expectation.Cancel)
+		{
+			return Result(messages, ProposeCancel) is null
+				? Call(ProposeCancel, new() { ["booking_id"] = booking })
+				: Say("Si quieres cancelarla, pulsa Cancelar cita en la tarjeta.");
+		}
+
+		if (Result(messages, ResolveDate) is not { } day)
+		{
+			return Call(ResolveDate, new() { ["expression"] = scenario.FirstDay });
+		}
+
+		if (Result(messages, CheckAvailability) is null)
+		{
+			return Call(CheckAvailability, new()
+			{
+				["professional_id"] = Names.Professional(expect.Professional!).Value.ToString(),
+				["service_id"] = Names.Service(expect.Service!).Value.ToString(),
+				["date"] = day.GetProperty("date").GetString(),
+			});
+		}
+
+		return Result(messages, ProposeReschedule) is null
+			? Call(ProposeReschedule, new() { ["booking_id"] = booking, ["start"] = InstantPattern.ExtendedIso.Format(set.At(expect.Start!)) })
+			: Say("Te aparté la nueva hora; el cambio se hace cuando pulses Confirmar en la tarjeta.");
 	}
 
 	// After a refused hold, the alternative nearest the time asked for; otherwise the expected time.

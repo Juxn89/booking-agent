@@ -17,6 +17,9 @@ public enum ErrorKind
 
 	/// <summary>The caller is sending too much, too fast: 429.</summary>
 	TooManyRequests = 4,
+
+	/// <summary>The caller must sign in first: 401.</summary>
+	Unauthorized = 5,
 }
 
 /// <summary>An expected failure: something the caller can act on. Bugs are exceptions, not errors.</summary>
@@ -57,6 +60,12 @@ public sealed record Error(string Code, string Message, ErrorKind Kind, IReadOnl
 	/// <param name="message">The message.</param>
 	/// <returns>The error.</returns>
 	public static Error TooManyRequests(string code, string message) => new(code, message, ErrorKind.TooManyRequests);
+
+	/// <summary>A 401.</summary>
+	/// <param name="code">The code.</param>
+	/// <param name="message">The message.</param>
+	/// <returns>The error.</returns>
+	public static Error Unauthorized(string code, string message) => new(code, message, ErrorKind.Unauthorized);
 }
 
 /// <summary>A value or an <see cref="Error"/>.</summary>

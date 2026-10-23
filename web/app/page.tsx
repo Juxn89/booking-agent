@@ -15,6 +15,9 @@ export default function Home() {
 				<Link href="/reservar" className="rounded-lg border border-line px-4 py-2 font-medium transition-colors hover:bg-brand-soft">
 					Usar el formulario
 				</Link>
+				<Link href="/mis-citas" className="rounded-lg border border-line px-4 py-2 font-medium transition-colors hover:bg-brand-soft">
+					Mis citas
+				</Link>
 				<Link href="/bandeja" className="rounded-lg border border-line px-4 py-2 font-medium transition-colors hover:bg-brand-soft">
 					Ver mi bandeja
 				</Link>

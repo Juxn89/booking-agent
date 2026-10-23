@@ -7,8 +7,7 @@ export const metadata: Metadata = { title: "Bandeja · Clínica Demo" };
 // Mailpit's web inbox, where the same notifications arrive by email in local runs (AppHost, port 8030).
 const MAILPIT_URL = "http://localhost:8030";
 
-export default async function InboxPage({ searchParams }: { searchParams: Promise<{ email?: string | string[] }> }) {
-	const { email } = await searchParams;
+export default function InboxPage() {
 	return (
 		<>
 			<Link href="/" className="text-sm text-muted hover:text-brand">
@@ -23,7 +22,7 @@ export default async function InboxPage({ searchParams }: { searchParams: Promis
 				</a>
 				.
 			</p>
-			<Inbox initialEmail={typeof email === "string" ? email : ""} />
+			<Inbox />
 		</>
 	);
 }

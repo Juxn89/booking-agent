@@ -1,6 +1,6 @@
 {
   "minHoldAccuracy": 0.92,
-  "maxAgentConfirmed": 0,
+  "maxChangedByAgent": 0,
   "maxUnverifiedHolds": 0,
   "minConflictsHandled": 4,
   "minRelativeDateAccuracy": 0.95,

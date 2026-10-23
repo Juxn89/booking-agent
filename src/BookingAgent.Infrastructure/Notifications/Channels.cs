@@ -2,6 +2,8 @@ namespace BookingAgent.Infrastructure.Notifications;
 
 using System.ComponentModel.DataAnnotations;
 using BookingAgent.Application.Abstractions;
+using BookingAgent.Application.Features.Customers;
+using BookingAgent.Domain.Catalog;
 using BookingAgent.Domain.Notifications;
 using BookingAgent.Infrastructure.Persistence;
 using MailKit.Net.Smtp;
@@ -58,20 +60,22 @@ public sealed class SmtpOptions
 }
 
 /// <summary>
-/// Email through MailKit, one connection per message: notifications are few, and a pooled connection would only
-/// add a way to fail (servers drop idle ones). The Message-ID is the notification's id, so a message delivered
-/// twice after a crash can be recognised as the same one.
+/// Email through MailKit, one connection per message: notifications and codes are few, and a pooled connection would
+/// only add a way to fail (servers drop idle ones).
 /// </summary>
 /// <param name="options">The server.</param>
-internal sealed class SmtpEmailChannel(IOptions<SmtpOptions> options) : INotificationChannel
+internal sealed class SmtpMailer(IOptions<SmtpOptions> options)
 {
-	private const string MessageIdDomain = "booking-agent";
-
-	public NotificationChannel Channel => NotificationChannel.Email;
-
-	public async Task SendAsync(OutgoingMessage message, CancellationToken cancellationToken)
+	/// <summary>Sends a plain-text email.</summary>
+	/// <param name="toName">The recipient's name.</param>
+	/// <param name="toEmail">The recipient's address.</param>
+	/// <param name="subject">The subject.</param>
+	/// <param name="body">The text.</param>
+	/// <param name="messageId">A Message-ID that recognises the same message sent twice, or none.</param>
+	/// <param name="cancellationToken">Cancellation.</param>
+	/// <returns>A task.</returns>
+	public async Task SendAsync(string toName, string toEmail, string subject, string body, string? messageId, CancellationToken cancellationToken)
 	{
-		ArgumentNullException.ThrowIfNull(message);
 		var settings = options.Value;
 		if (string.IsNullOrWhiteSpace(settings.Host))
 		{
@@ -79,11 +83,15 @@ internal sealed class SmtpEmailChannel(IOptions<SmtpOptions> options) : INotific
 		}
 
 		using var email = new MimeMessage();
-		email.MessageId = $"{message.NotificationId}@{MessageIdDomain}";
+		if (messageId is not null)
+		{
+			email.MessageId = messageId;
+		}
+
 		email.From.Add(new MailboxAddress(settings.FromName, settings.FromAddress));
-		email.To.Add(new MailboxAddress(message.ToName, message.ToEmail));
-		email.Subject = message.Subject;
-		email.Body = new TextPart(MimeKit.Text.TextFormat.Plain) { Text = message.Body };
+		email.To.Add(new MailboxAddress(toName, toEmail));
+		email.Subject = subject;
+		email.Body = new TextPart(MimeKit.Text.TextFormat.Plain) { Text = body };
 
 		using var client = new SmtpClient { Timeout = (int)settings.Timeout.TotalMilliseconds };
 		await client.ConnectAsync(settings.Host, settings.Port, Map(settings.Security), cancellationToken).ConfigureAwait(false);
@@ -102,6 +110,43 @@ internal sealed class SmtpEmailChannel(IOptions<SmtpOptions> options) : INotific
 		SmtpSecurity.SslOnConnect => SecureSocketOptions.SslOnConnect,
 		_ => SecureSocketOptions.StartTls,
 	};
+}
+
+/// <summary>
+/// The email channel. The Message-ID is the notification's id, so a message delivered twice after a crash can be
+/// recognised as the same one.
+/// </summary>
+/// <param name="mailer">The SMTP server.</param>
+internal sealed class SmtpEmailChannel(SmtpMailer mailer) : INotificationChannel
+{
+	private const string MessageIdDomain = "booking-agent";
+
+	public NotificationChannel Channel => NotificationChannel.Email;
+
+	public Task SendAsync(OutgoingMessage message, CancellationToken cancellationToken)
+	{
+		ArgumentNullException.ThrowIfNull(message);
+		return mailer.SendAsync(message.ToName, message.ToEmail, message.Subject, message.Body, $"{message.NotificationId}@{MessageIdDomain}", cancellationToken);
+	}
+}
+
+/// <summary>Emails sign-in codes, at once: the customer is waiting for it, so it does not go through the outbox.</summary>
+/// <param name="mailer">The SMTP server.</param>
+internal sealed class SmtpSignInCodeSender(SmtpMailer mailer) : ISignInCodeSender
+{
+	public Task SendAsync(Customer customer, string businessName, string digits, Duration lifetime, CancellationToken cancellationToken)
+	{
+		ArgumentNullException.ThrowIfNull(customer);
+		var minutes = (int)lifetime.TotalMinutes;
+		return mailer.SendAsync(
+			customer.Name,
+			customer.Email,
+			$"Tu código para {businessName}: {digits}",
+			$"Hola, {customer.Name}: tu código para ver y cambiar tus citas en {businessName} es {digits}. Vence en {minutes} minutos.\n\n" +
+			"Si no lo pediste, ignora este mensaje: nadie puede entrar sin él.",
+			messageId: null,
+			cancellationToken);
+	}
 }
 
 /// <summary>

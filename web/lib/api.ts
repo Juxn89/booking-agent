@@ -36,9 +36,33 @@ export type HeldByAssistant = {
 	professionalName: string;
 	localStart: string;
 	expiresAt: string;
+	// For a move: the appointment it replaces once confirmed.
+	replaces: string | null;
 };
 
-export type AssistantReply = { conversationId: string; reply: string; holds: HeldByAssistant[] };
+// A cancellation the assistant proposes; the customer cancels it, signed in, with the card's button.
+export type CancelProposal = { bookingId: string; serviceName: string; professionalName: string; localStart: string };
+
+export type AssistantReply = {
+	conversationId: string;
+	reply: string;
+	holds: HeldByAssistant[];
+	cancellations: CancelProposal[];
+	signInRequired: boolean;
+};
+
+export type Me = { name: string; email: string; expiresAt: string };
+
+export type MyBooking = {
+	id: string;
+	serviceId: string;
+	serviceName: string;
+	professionalId: string;
+	professionalName: string;
+	start: string;
+	localStart: string;
+	canChange: boolean;
+};
 
 export type InboxItem = { id: string; bookingId: string; subject: string; body: string; receivedAt: string };
 
@@ -56,6 +80,9 @@ async function call<T>(path: string, init?: RequestInit): Promise<T> {
 		...init,
 		headers: { Accept: "application/json", ...(init?.body ? { "Content-Type": "application/json" } : {}) },
 	});
+	if (response.status === 202 || response.status === 204) {
+		return undefined as T;
+	}
 	if (!response.ok) {
 		const problem = (await response.json().catch(() => null)) as Problem | null;
 		throw new ApiError(problem ?? { status: response.status, title: response.statusText, code: "http.error" });
@@ -80,5 +107,14 @@ export const api = {
 			method: "POST",
 			body: JSON.stringify({ conversationId, message }),
 		}),
-	inbox: (email: string) => call<InboxItem[]>(`/v1/dev/inbox?email=${encodeURIComponent(email)}`),
+	requestCode: (email: string) => call<void>(`/v1/businesses/${BUSINESS_ID}/sign-in/code`, { method: "POST", body: JSON.stringify({ email }) }),
+	signIn: (email: string, code: string) =>
+		call<Me>(`/v1/businesses/${BUSINESS_ID}/sign-in`, { method: "POST", body: JSON.stringify({ email, code }) }),
+	signOut: () => call<void>(`/v1/businesses/${BUSINESS_ID}/sign-out`, { method: "POST" }),
+	me: () => call<Me>(`/v1/businesses/${BUSINESS_ID}/me`),
+	myBookings: () => call<MyBooking[]>(`/v1/businesses/${BUSINESS_ID}/me/bookings`),
+	cancelMine: (id: string) => call<Booking>(`/v1/businesses/${BUSINESS_ID}/me/bookings/${id}/cancel`, { method: "POST" }),
+	moveMine: (id: string, start: string) =>
+		call<Hold>(`/v1/businesses/${BUSINESS_ID}/me/bookings/${id}/reschedule`, { method: "POST", body: JSON.stringify({ start }) }),
+	inbox: () => call<InboxItem[]>(`/v1/businesses/${BUSINESS_ID}/me/inbox`),
 };

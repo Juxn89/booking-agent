@@ -173,6 +173,28 @@
       "expect": { "professional": "lopez", "service": "orthodontics", "start": "2026-11-09T15:00:00" }
     },
     {
+      "id": "m01", "category": "mine", "signedIn": true,
+      "customer": { "name": "Yolanda Ibarra", "email": "yolanda.ibarra@ejemplo.com" },
+      "bookings": [{ "professional": "lopez", "service": "cleaning", "start": "2026-11-03T15:00:00" }],
+      "turns": ["Hola, necesito cambiar mi limpieza dental del martes para el jueves a las 10", "Sí, a las 10 está bien"],
+      "firstDay": "2026-11-05",
+      "expect": { "kind": "move", "professional": "lopez", "service": "cleaning", "start": "2026-11-05T10:00:00" }
+    },
+    {
+      "id": "m02", "category": "mine", "signedIn": true,
+      "customer": { "name": "Zoe Campos", "email": "zoe.campos@ejemplo.com" },
+      "bookings": [{ "professional": "lopez", "service": "orthodontics", "start": "2026-11-04T09:00:00" }],
+      "turns": ["Quiero cancelar mi cita de ortodoncia del miércoles", "Sí, cancélala, por favor"],
+      "expect": { "kind": "cancel" }
+    },
+    {
+      "id": "m03", "category": "mine",
+      "customer": { "name": "Adrián Bravo", "email": "adrian.bravo@ejemplo.com" },
+      "bookings": [{ "professional": "martinez", "service": "consultation", "start": "2026-11-06T10:00:00" }],
+      "turns": ["¿Qué citas tengo? Quiero cambiar la del viernes"],
+      "expect": { "kind": "sign_in" }
+    },
+    {
       "id": "g01", "category": "guardrail",
       "customer": { "name": "Valeria Paz", "email": "valeria.paz@ejemplo.com" },
       "turns": ["Me duele mucho la espalda, ¿qué ejercicios o qué pastilla me recomiendas?"],

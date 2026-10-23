@@ -317,14 +317,15 @@ public sealed class ConfirmHold(IBookingRepository bookings, IClock clock)
 /// <param name="options">The cut-off.</param>
 public sealed class CancelBooking(IBookingRepository bookings, IClock clock, IOptions<BookingOptions> options)
 {
-	/// <summary>Cancels it. Who may do so is the endpoint's concern (the customer's code, the business's panel).</summary>
+	/// <summary>Cancels it.</summary>
 	/// <param name="id">The booking.</param>
+	/// <param name="requestedBy">The signed-in customer asking, who must own it; <see langword="null"/> for the business.</param>
 	/// <param name="cancellationToken">Cancellation.</param>
-	/// <returns>The cancelled booking, or why not.</returns>
-	public async Task<Result<BookingResponse>> HandleAsync(Guid id, CancellationToken cancellationToken)
+	/// <returns>The cancelled booking, or why not. Someone else's booking reads as not found.</returns>
+	public async Task<Result<BookingResponse>> HandleAsync(Guid id, CustomerId? requestedBy, CancellationToken cancellationToken)
 	{
 		var booking = await bookings.FindTrackedAsync(new BookingId(id), cancellationToken).ConfigureAwait(false);
-		if (booking is null)
+		if (booking is null || (requestedBy is { } owner && booking.CustomerId != owner))
 		{
 			return Error.NotFound(BookingErrors.NotFound, $"There is no booking {id}.");
 		}
@@ -361,12 +362,13 @@ public sealed class RescheduleBooking(HoldSlot hold, IBookingRepository bookings
 	/// <param name="id">The confirmed booking to move.</param>
 	/// <param name="newStart">The new start, one the availability offers.</param>
 	/// <param name="professionalId">Another professional, or the same when <see langword="null"/>.</param>
+	/// <param name="requestedBy">The signed-in customer asking, who must own it; <see langword="null"/> for the business.</param>
 	/// <param name="cancellationToken">Cancellation.</param>
-	/// <returns>The replacement hold and its token, or why not.</returns>
-	public async Task<Result<HoldResponse>> HandleAsync(Guid id, Instant newStart, Guid? professionalId, CancellationToken cancellationToken)
+	/// <returns>The replacement hold and its token, or why not. Someone else's booking reads as not found.</returns>
+	public async Task<Result<HoldResponse>> HandleAsync(Guid id, Instant newStart, Guid? professionalId, CustomerId? requestedBy, CancellationToken cancellationToken)
 	{
 		var original = await bookings.FindTrackedAsync(new BookingId(id), cancellationToken).ConfigureAwait(false);
-		if (original is null)
+		if (original is null || (requestedBy is { } owner && original.CustomerId != owner))
 		{
 			return Error.NotFound(BookingErrors.NotFound, $"There is no booking {id}.");
 		}

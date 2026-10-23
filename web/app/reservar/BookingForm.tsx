@@ -143,7 +143,7 @@ export function BookingForm() {
 				</p>
 				<div className="mt-6 flex flex-wrap gap-3">
 					<Link
-						href={`/bandeja?email=${encodeURIComponent(customer.email)}`}
+						href="/bandeja"
 						className="rounded-lg bg-brand px-4 py-2 font-medium text-white transition-colors hover:bg-brand-dark"
 					>
 						Ver mi bandeja

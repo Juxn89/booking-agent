@@ -2,16 +2,19 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { ApiError, api, type HeldByAssistant } from "@/lib/api";
+import { ApiError, api, type CancelProposal, type HeldByAssistant } from "@/lib/api";
 import { formatDay, formatTime } from "@/lib/format";
 import { HoldCard } from "../ui/HoldCard";
+import { SignIn } from "../ui/SignIn";
 
 type Card = { hold: HeldByAssistant; state: "held" | "confirming" | "confirmed" | "dismissed"; error: string | null };
 
+type Cancellation = { proposal: CancelProposal; state: "proposed" | "cancelling" | "cancelled" | "dismissed"; error: string | null };
+
 type Entry =
 	| { id: number; from: "customer"; text: string }
-	| { id: number; from: "assistant"; text: string; cards: Card[] }
-	| { id: number; from: "notice"; text: string; action?: "form" | "restart" };
+	| { id: number; from: "assistant"; text: string; cards: Card[]; cancels: Cancellation[]; signIn: boolean }
+	| { id: number; from: "notice"; text: string; action?: "form" | "restart"; tone?: "info" };
 
 type WithoutId<T> = T extends unknown ? Omit<T, "id"> : never;
 
@@ -43,7 +46,7 @@ const confirmError = (error: unknown) =>
 		: "No se pudo confirmar. Pídele al asistente que lo intente de nuevo.";
 
 export function Chat({ city }: { city: string }) {
-	const [entries, setEntries] = useState<Entry[]>([{ id: 0, from: "assistant", text: GREETING, cards: [] }]);
+	const [entries, setEntries] = useState<Entry[]>([{ id: 0, from: "assistant", text: GREETING, cards: [], cancels: [], signIn: false }]);
 	const [conversationId, setConversationId] = useState<string | null>(null);
 	const [draft, setDraft] = useState("");
 	const [busy, setBusy] = useState(false);
@@ -66,18 +69,35 @@ export function Chat({ city }: { city: string }) {
 			),
 		);
 
-	async function send(text: string) {
+	const updateCancel = (bookingId: string, change: Partial<Cancellation>) =>
+		setEntries((all) =>
+			all.map((entry) =>
+				entry.from === "assistant" && entry.cancels.some((c) => c.proposal.bookingId === bookingId)
+					? { ...entry, cancels: entry.cancels.map((c) => (c.proposal.bookingId === bookingId ? { ...c, ...change } : c)) }
+					: entry,
+			),
+		);
+
+	async function send(text: string, repeat = false) {
 		const message = text.trim();
 		if (!message || busy) {
 			return;
 		}
-		add({ from: "customer", text: message });
+		if (!repeat) {
+			add({ from: "customer", text: message });
+		}
 		setDraft("");
 		setBusy(true);
 		try {
 			const reply = await api.send(conversationId, message);
 			setConversationId(reply.conversationId);
-			add({ from: "assistant", text: reply.reply, cards: reply.holds.map((hold) => ({ hold, state: "held", error: null })) });
+			add({
+				from: "assistant",
+				text: reply.reply,
+				cards: reply.holds.map((hold) => ({ hold, state: "held", error: null })),
+				cancels: reply.cancellations.map((proposal) => ({ proposal, state: "proposed", error: null })),
+				signIn: reply.signInRequired,
+			});
 		} catch (error) {
 			add(noticeFor(error));
 		} finally {
@@ -96,9 +116,36 @@ export function Chat({ city }: { city: string }) {
 		}
 	}
 
+	// The customer cancels, signed in, with the card's button: the assistant only proposed it.
+	async function cancel(item: Cancellation) {
+		updateCancel(item.proposal.bookingId, { state: "cancelling", error: null });
+		try {
+			await api.cancelMine(item.proposal.bookingId);
+			updateCancel(item.proposal.bookingId, { state: "cancelled" });
+		} catch (error) {
+			updateCancel(item.proposal.bookingId, {
+				state: "proposed",
+				error:
+					error instanceof ApiError && error.problem.code === "booking.too_late"
+						? "Ya es muy tarde para cancelarla aquí; llámanos, por favor."
+						: "No se pudo cancelar. Intenta de nuevo.",
+			});
+		}
+	}
+
+	// Once signed in, the question that needed it is asked again.
+	function signedIn(entryId: number, name: string) {
+		setEntries((all) => all.map((entry) => (entry.id === entryId && entry.from === "assistant" ? { ...entry, signIn: false } : entry)));
+		add({ from: "notice", tone: "info", text: `Listo, ${name}. Ya puedo ver tus citas.` });
+		const last = [...entries].reverse().find((entry) => entry.from === "customer");
+		if (last) {
+			void send(last.text, true);
+		}
+	}
+
 	function restart() {
 		setConversationId(null);
-		setEntries([{ id: nextId.current++, from: "assistant", text: GREETING, cards: [] }]);
+		setEntries([{ id: nextId.current++, from: "assistant", text: GREETING, cards: [], cancels: [], signIn: false }]);
 	}
 
 	function submit(event: FormEvent) {
@@ -123,10 +170,23 @@ export function Chat({ city }: { city: string }) {
 										input.current?.focus();
 									}} />
 								))}
+								{entry.cancels.map((item) => (
+									<CancelView
+										key={item.proposal.bookingId}
+										item={item}
+										city={city}
+										onCancel={() => cancel(item)}
+										onKeep={() => updateCancel(item.proposal.bookingId, { state: "dismissed" })}
+									/>
+								))}
+								{entry.signIn && <SignIn compact onSignedIn={(me) => signedIn(entry.id, me.name)} />}
 							</div>
 						)}
 						{entry.from === "notice" && (
-							<p role="alert" className="max-w-[90%] rounded-lg bg-danger-soft px-4 py-2 text-sm text-danger">
+							<p
+								role={entry.tone === "info" ? "status" : "alert"}
+								className={`max-w-[90%] rounded-lg px-4 py-2 text-sm ${entry.tone === "info" ? "bg-brand-soft text-brand-dark" : "bg-danger-soft text-danger"}`}
+							>
 								{entry.text}{" "}
 								{entry.action === "form" && (
 									<Link href="/reservar" className="font-medium underline">
@@ -197,15 +257,62 @@ export function Chat({ city }: { city: string }) {
 	);
 }
 
+function CancelView({ item, city, onCancel, onKeep }: { item: Cancellation; city: string; onCancel: () => void; onKeep: () => void }) {
+	const { proposal } = item;
+	const when = `${formatDay(proposal.localStart)}, ${formatTime(proposal.localStart)} (hora de ${city})`;
+	if (item.state === "dismissed") {
+		return <p className="text-sm text-muted">La cita sigue en pie.</p>;
+	}
+	if (item.state === "cancelled") {
+		return (
+			<section className="rounded-xl border border-line bg-paper p-4" aria-label="Cita cancelada">
+				<p className="text-sm font-medium uppercase tracking-wide text-muted">Cita cancelada</p>
+				<p className="mt-1 font-semibold">
+					{proposal.serviceName} con {proposal.professionalName}
+				</p>
+				<p className="mt-1 text-muted">{when}. Te enviamos el aviso por correo.</p>
+			</section>
+		);
+	}
+	return (
+		<section className="rounded-xl border border-danger bg-card p-4 shadow-sm" aria-label="Cancelar cita">
+			<p className="text-sm font-medium uppercase tracking-wide text-danger">¿Cancelar esta cita?</p>
+			<p className="mt-1 font-semibold">
+				{proposal.serviceName} con {proposal.professionalName}
+			</p>
+			<p className="mt-1 text-muted">{when}.</p>
+			<div className="mt-4 flex flex-wrap gap-3">
+				<button
+					type="button"
+					onClick={onCancel}
+					disabled={item.state === "cancelling"}
+					className="rounded-lg bg-danger px-5 py-2.5 font-medium text-white disabled:opacity-60"
+				>
+					{item.state === "cancelling" ? "Cancelando…" : "Cancelar cita"}
+				</button>
+				<button type="button" onClick={onKeep} className="rounded-lg border border-line px-5 py-2.5 font-medium transition-colors hover:bg-brand-soft">
+					Mantenerla
+				</button>
+			</div>
+			{item.error && (
+				<p role="alert" className="mt-2 text-sm text-danger">
+					{item.error}
+				</p>
+			)}
+		</section>
+	);
+}
+
 function CardView({ card, city, onConfirm, onChange }: { card: Card; city: string; onConfirm: () => void; onChange: () => void }) {
-	const summary = `${card.hold.serviceName} con ${card.hold.professionalName}`;
+	const move = card.hold.replaces !== null;
+	const summary = `${move ? "Cambio: " : ""}${card.hold.serviceName} con ${card.hold.professionalName}`;
 	if (card.state === "dismissed") {
 		return <p className="text-sm text-muted">Dejaste pasar este horario. Dime cuál prefieres.</p>;
 	}
 	if (card.state === "confirmed") {
 		return (
-			<section className="rounded-xl border border-brand bg-brand-soft p-4" aria-label="Cita confirmada">
-				<p className="text-sm font-medium uppercase tracking-wide text-brand">Cita confirmada</p>
+			<section className="rounded-xl border border-brand bg-brand-soft p-4" aria-label={move ? "Cita cambiada" : "Cita confirmada"}>
+				<p className="text-sm font-medium uppercase tracking-wide text-brand">{move ? "Cita cambiada" : "Cita confirmada"}</p>
 				<p className="mt-1 font-semibold">{summary}</p>
 				<p className="mt-1 text-muted">
 					{formatDay(card.hold.localStart)}, {formatTime(card.hold.localStart)} (hora de {city}). Te enviamos la confirmación por correo.

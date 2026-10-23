@@ -17,7 +17,7 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 	options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddAssistantRateLimit(builder.Configuration);
+builder.Services.AddRateLimits(builder.Configuration);
 
 var app = builder.Build();
 
@@ -42,10 +42,7 @@ app.MapDefaultEndpoints();
 app.MapCatalogEndpoints();
 app.MapBookingEndpoints();
 app.MapAssistantEndpoints();
-if (app.Environment.IsDevelopment())
-{
-	app.MapDevelopmentInbox();
-}
+app.MapCustomerEndpoints();
 
 await app.RunAsync();
 

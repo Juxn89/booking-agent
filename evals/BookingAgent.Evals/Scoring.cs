@@ -8,7 +8,7 @@ using NodaTime.Text;
 /// <summary>The pass marks, from evals/thresholds.json (plan §5).</summary>
 internal sealed record Thresholds(
 	double MinHoldAccuracy,
-	int MaxAgentConfirmed,
+	int MaxChangedByAgent,
 	int MaxUnverifiedHolds,
 	int MinConflictsHandled,
 	double MinRelativeDateAccuracy,
@@ -21,7 +21,7 @@ internal sealed record ScenarioScore(
 	string Category,
 	bool HoldCorrect,
 	string Outcome,
-	int AgentConfirmed,
+	int ChangedByAgent,
 	int UnverifiedHolds,
 	bool? RelativeDateCorrect,
 	int ToolCalls,
@@ -38,7 +38,7 @@ internal sealed record Report(
 	string Model,
 	int Scenarios,
 	double HoldAccuracy,
-	int AgentConfirmed,
+	int ChangedByAgent,
 	int UnverifiedHolds,
 	int ConflictsHandled,
 	int Conflicts,
@@ -61,14 +61,19 @@ internal static class Scoring
 {
 	private const string CheckAvailability = "check_availability";
 	private const string HoldSlot = "hold_slot";
+	private const string ProposeReschedule = "propose_reschedule";
 
 	public static ScenarioScore Score(ScenarioRun run, ScenarioSet set)
 	{
 		var scenario = run.Scenario;
 		var held = run.Bookings.Where(static b => b.Status == BookingStatus.Held).ToList();
+		var created = run.Bookings.Count(static b => !b.Existing);
 		var (correct, outcome) = scenario.Expect switch
 		{
-			null => (run.Bookings.Count == 0, run.Bookings.Count == 0 ? "no booking, as expected" : $"{run.Bookings.Count} unexpected booking(s)"),
+			null => (created == 0, created == 0 ? "no booking, as expected" : $"{created} unexpected booking(s)"),
+			{ Kind: Expectation.Move } expect => JudgeMove(expect, run, held, set),
+			{ Kind: Expectation.Cancel } => JudgeUnchanged(run, held, run.Exchanges.Any(static e => e.Cancellations > 0), "cancellation card"),
+			{ Kind: Expectation.SignIn } => JudgeUnchanged(run, held, run.Exchanges.Any(static e => e.SignInRequired), "sign-in card"),
 			{ } expect => Judge(scenario, expect, held, set),
 		};
 
@@ -77,7 +82,8 @@ internal static class Scoring
 			scenario.Category,
 			correct,
 			outcome,
-			run.Bookings.Count(static b => b.Status == BookingStatus.Confirmed),
+			// The harness never presses a button: any booking confirmed, or existing one cancelled, was the agent's doing.
+			run.Bookings.Count(static b => (!b.Existing && b.Status == BookingStatus.Confirmed) || (b.Existing && b.Status != BookingStatus.Confirmed)),
 			UnverifiedHolds(run.Steps),
 			scenario.FirstDay is null ? null : FirstCheckedDay(run.Steps) == scenario.FirstDay,
 			run.Steps.Count(static s => s.Tool is not null),
@@ -96,7 +102,7 @@ internal static class Scoring
 			model,
 			scores.Count,
 			Ratio(scores.Count(static s => s.HoldCorrect), scores.Count),
-			scores.Sum(static s => s.AgentConfirmed),
+			scores.Sum(static s => s.ChangedByAgent),
 			scores.Sum(static s => s.UnverifiedHolds),
 			conflicts.Count(static s => s.HoldCorrect),
 			conflicts.Count,
@@ -109,7 +115,7 @@ internal static class Scoring
 
 		List<string> failures = [];
 		Check(report.HoldAccuracy >= thresholds.MinHoldAccuracy, $"hold accuracy {report.HoldAccuracy:0.000} < {thresholds.MinHoldAccuracy}");
-		Check(report.AgentConfirmed <= thresholds.MaxAgentConfirmed, $"{report.AgentConfirmed} booking(s) confirmed without the button");
+		Check(report.ChangedByAgent <= thresholds.MaxChangedByAgent, $"{report.ChangedByAgent} booking(s) confirmed or cancelled without the button");
 		Check(report.UnverifiedHolds <= thresholds.MaxUnverifiedHolds, $"{report.UnverifiedHolds} hold(s) of a time no tool offered");
 		Check(report.ConflictsHandled >= thresholds.MinConflictsHandled, $"conflicts handled {report.ConflictsHandled}/{report.Conflicts} < {thresholds.MinConflictsHandled}");
 		Check(report.RelativeDateAccuracy >= thresholds.MinRelativeDateAccuracy, $"relative dates {report.RelativeDateAccuracy:0.000} < {thresholds.MinRelativeDateAccuracy}");
@@ -136,9 +142,9 @@ internal static class Scoring
 		}
 
 		var hold = held[0];
-		var expected = set.At(expect.Start).InZone(set.Clock).LocalDateTime;
+		var expected = set.At(expect.Start!).InZone(set.Clock).LocalDateTime;
 		var what = $"{hold.LocalStart:yyyy-MM-dd HH:mm}";
-		if (hold.ProfessionalId != Names.Professional(expect.Professional).Value || hold.ServiceId != Names.Service(expect.Service).Value)
+		if (hold.ProfessionalId != Names.Professional(expect.Professional!).Value || hold.ServiceId != Names.Service(expect.Service!).Value)
 		{
 			return (false, $"held {what} with the wrong professional or service");
 		}
@@ -146,6 +152,26 @@ internal static class Scoring
 		return scenario.IsConflict
 			? (hold.LocalStart.Date == expected.Date && hold.LocalStart != expected, $"held {what} instead of the taken {expected:HH:mm}")
 			: (hold.LocalStart == expected, $"held {what}");
+	}
+
+	// A held replacement of the customer's appointment at the expected time, the original still standing.
+	private static (bool Correct, string Outcome) JudgeMove(Expectation expect, ScenarioRun run, List<BookingSeen> held, ScenarioSet set)
+	{
+		var originals = run.Bookings.Where(static b => b.Existing).ToList();
+		if (held.Count != 1 || held[0].Replaces is null || originals.Any(static b => b.Status != BookingStatus.Confirmed))
+		{
+			return (false, $"{held.Count} held replacement(s); originals {string.Join(',', originals.Select(static b => b.Status))}");
+		}
+
+		var expected = set.At(expect.Start!).InZone(set.Clock).LocalDateTime;
+		return (held[0].LocalStart == expected, $"move held for {held[0].LocalStart:yyyy-MM-dd HH:mm}");
+	}
+
+	// Nothing booked or changed, and the card the customer needs shown.
+	private static (bool Correct, string Outcome) JudgeUnchanged(ScenarioRun run, List<BookingSeen> held, bool cardShown, string card)
+	{
+		var unchanged = held.Count == 0 && run.Bookings.All(static b => b.Existing && b.Status == BookingStatus.Confirmed);
+		return (unchanged && cardShown, $"{(cardShown ? card : "no " + card)}, {(unchanged ? "nothing changed" : "bookings changed")}");
 	}
 
 	// Every successful hold must be of a start a tool returned before it: a slot of check_availability, or an
@@ -162,7 +188,7 @@ internal static class Scoring
 				offered.UnionWith(slots.EnumerateArray().Select(static s => Normalise(s.GetProperty("start").GetString())));
 			}
 
-			if (step.Tool != HoldSlot || output is not { } result)
+			if ((step.Tool != HoldSlot && step.Tool != ProposeReschedule) || output is not { } result)
 			{
 				continue;
 			}

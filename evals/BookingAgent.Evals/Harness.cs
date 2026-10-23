@@ -3,6 +3,7 @@ namespace BookingAgent.Evals;
 using System.Text.Json;
 using BookingAgent.Application.Features.Assistant;
 using BookingAgent.Application.Features.Bookings;
+using BookingAgent.Application.Features.Customers;
 using BookingAgent.Domain.Bookings;
 using BookingAgent.Domain.Catalog;
 using BookingAgent.Infrastructure;
@@ -18,10 +19,10 @@ using NodaTime.Testing;
 using Testcontainers.PostgreSql;
 
 /// <summary>One message and its answer.</summary>
-internal sealed record Exchange(string Customer, string? Assistant, int Holds, string? Error);
+internal sealed record Exchange(string Customer, string? Assistant, int Holds, int Cancellations, bool SignInRequired, string? Error);
 
 /// <summary>A booking of the scenario's customer, as the database has it at the end.</summary>
-internal sealed record BookingSeen(BookingStatus Status, Guid ProfessionalId, Guid ServiceId, LocalDateTime LocalStart);
+internal sealed record BookingSeen(BookingStatus Status, Guid ProfessionalId, Guid ServiceId, LocalDateTime LocalStart, bool Existing, Guid? Replaces);
 
 /// <summary>A step the assistant took.</summary>
 internal sealed record StepSeen(int Turn, int Ordinal, string? Tool, string? Input, string? Output, decimal CostUsd);
@@ -61,6 +62,23 @@ internal sealed class Harness : IAsyncDisposable
 		var clock = new FakeClock(set.Now);
 		await using var services = Services(clock, model);
 		await ResetAsync(set, services);
+		foreach (var own in scenario.Bookings ?? [])
+		{
+			await BookAsync(set, services, own.Professional, own.Service, own.Start, scenario.Customer.Email, scenario.Customer.Name);
+		}
+
+		HashSet<Guid> existing;
+		SignedInCustomer? customer = null;
+		await using (var scope = services.CreateAsyncScope())
+		{
+			var before = scope.ServiceProvider.GetRequiredService<BookingDbContext>();
+			existing = [.. await before.Bookings.Select(static b => b.Id.Value).ToListAsync()];
+			if (scenario.SignedIn)
+			{
+				var known = await before.Customers.SingleAsync(c => c.Email == scenario.Customer.Email);
+				customer = new SignedInCustomer(known.Id, known.BusinessId, known.Name, known.Email, set.Now + Duration.FromHours(2));
+			}
+		}
 
 		var exchanges = new List<Exchange>();
 		Guid? conversation = null;
@@ -70,20 +88,20 @@ internal sealed class Harness : IAsyncDisposable
 			await using (var scope = services.CreateAsyncScope())
 			{
 				var result = await scope.ServiceProvider.GetRequiredService<AgentRunner>()
-					.HandleAsync(DemoData.Clinic.Value, new AssistantRequest(conversation, message), CancellationToken.None);
+					.HandleAsync(DemoData.Clinic.Value, new AssistantRequest(conversation, message), customer, CancellationToken.None);
 				if (!result.IsSuccess)
 				{
-					exchanges.Add(new Exchange(message, null, 0, result.Error!.Code));
+					exchanges.Add(new Exchange(message, null, 0, 0, false, result.Error!.Code));
 					break;
 				}
 
 				conversation = result.Value.ConversationId;
-				exchanges.Add(new Exchange(message, result.Value.Reply, result.Value.Holds.Count, null));
+				exchanges.Add(new Exchange(message, result.Value.Reply, result.Value.Holds.Count, result.Value.Cancellations.Count, result.Value.SignInRequired, null));
 			}
 
-			if (scenario.ConflictAfterTurn == turn && scenario.Expect is { } taken)
+			if (scenario.ConflictAfterTurn == turn && scenario.Expect is { Professional: { } professional, Service: { } service, Start: { } start })
 			{
-				await BookAsync(set, services, taken.Professional, taken.Service, taken.Start, OtherCustomerEmail);
+				await BookAsync(set, services, professional, service, start, OtherCustomerEmail, "Otra persona");
 			}
 		}
 
@@ -100,7 +118,7 @@ internal sealed class Harness : IAsyncDisposable
 		return new ScenarioRun(
 			scenario,
 			exchanges,
-			[.. bookings.Select(b => new BookingSeen(b.Status, b.ProfessionalId.Value, b.ServiceId.Value, b.Period.Start.InZone(zone).LocalDateTime))],
+			[.. bookings.Select(b => new BookingSeen(b.Status, b.ProfessionalId.Value, b.ServiceId.Value, b.Period.Start.InZone(zone).LocalDateTime, existing.Contains(b.Id.Value), b.Replaces?.Value))],
 			[.. steps.Select(static s => new StepSeen(s.Turn, s.Ordinal, s.ToolName, s.Input, s.Output, s.CostUsd))],
 			steps.Sum(static s => s.CostUsd));
 	}
@@ -131,21 +149,21 @@ internal sealed class Harness : IAsyncDisposable
 		await using (var scope = services.CreateAsyncScope())
 		{
 			var db = scope.ServiceProvider.GetRequiredService<BookingDbContext>();
-			await db.Database.ExecuteSqlRawAsync("TRUNCATE agent_steps, agent_conversations, inbox_messages, notifications, bookings, customers, time_off");
+			await db.Database.ExecuteSqlRawAsync("TRUNCATE agent_steps, agent_conversations, customer_sessions, sign_in_codes, inbox_messages, notifications, bookings, customers, time_off");
 			db.TimeOff.AddRange(set.TimeOff.Select(t => TimeOff.Create(Names.Professional(t.Professional), new Interval(set.At(t.From), set.At(t.To)), t.Reason)));
 			await db.SaveChangesAsync();
 		}
 
 		foreach (var entry in set.Agenda)
 		{
-			await BookAsync(set, services, entry.Professional, entry.Service, entry.Start, AgendaEmail);
+			await BookAsync(set, services, entry.Professional, entry.Service, entry.Start, AgendaEmail, "Otra persona");
 		}
 	}
 
-	private static async Task BookAsync(ScenarioSet set, ServiceProvider services, string professional, string service, string start, string email)
+	private static async Task BookAsync(ScenarioSet set, ServiceProvider services, string professional, string service, string start, string email, string name)
 	{
 		await using var scope = services.CreateAsyncScope();
-		var request = new HoldRequest(Names.Professional(professional).Value, Names.Service(service).Value, set.At(start), new CustomerDetails("Otra persona", email, null));
+		var request = new HoldRequest(Names.Professional(professional).Value, Names.Service(service).Value, set.At(start), new CustomerDetails(name, email, null));
 		var hold = await scope.ServiceProvider.GetRequiredService<HoldSlot>().HandleAsync(request, CancellationToken.None);
 		if (!hold.IsSuccess)
 		{

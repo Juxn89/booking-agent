@@ -1,6 +1,7 @@
 namespace BookingAgent.Api.Endpoints;
 
 using BookingAgent.Application.Features.Assistant;
+using BookingAgent.Application.Features.Customers;
 
 /// <summary>The chat: one message in, the assistant's reply and any held slots out.</summary>
 internal static class AssistantEndpoints
@@ -12,11 +13,21 @@ internal static class AssistantEndpoints
 	{
 		app.MapPost("/v1/businesses/{businessId:guid}/assistant/messages", MessageAsync)
 			.WithTags("Assistant")
-			.RequireRateLimiting(AssistantRateLimit.Policy);
+			.RequireRateLimiting(RateLimits.Assistant);
 		return app;
 	}
 
-	// POST {"conversationId": null, "message": "Quiero una limpieza el martes"} → {conversationId, reply, holds}.
-	private static async Task<IResult> MessageAsync(Guid businessId, AssistantRequest request, AgentRunner runner, CancellationToken cancellationToken) =>
-		(await runner.HandleAsync(businessId, request, cancellationToken)).ToHttp(Results.Ok);
+	// POST {"conversationId": null, "message": "Quiero una limpieza el martes"} → {conversationId, reply, holds, ...}.
+	// A signed-in customer (the session cookie) lets the assistant see and propose changes to their appointments.
+	private static async Task<IResult> MessageAsync(
+		Guid businessId,
+		AssistantRequest request,
+		AgentRunner runner,
+		CustomerSessions sessions,
+		HttpContext http,
+		CancellationToken cancellationToken)
+	{
+		var customer = await CustomerEndpoints.CurrentAsync(http, businessId, sessions);
+		return (await runner.HandleAsync(businessId, request, customer, cancellationToken)).ToHttp(Results.Ok);
+	}
 }

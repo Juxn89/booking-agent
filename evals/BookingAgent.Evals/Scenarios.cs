@@ -31,14 +31,27 @@ internal sealed record TimeOffEntry(string Professional, string From, string To,
 /// <summary>The simulated customer.</summary>
 internal sealed record Person(string Name, string Email);
 
-/// <summary>The hold a scenario should end with. For a conflict, the time someone else takes mid-conversation.</summary>
-internal sealed record Expectation(string Professional, string Service, string Start);
+/// <summary>
+/// How a scenario should end. <see cref="Kind"/> is <c>hold</c> (the default: one active hold at <see cref="Start"/>;
+/// for a conflict, the time someone else takes mid-conversation), <c>move</c> (a held replacement of the
+/// customer's appointment at <see cref="Start"/>, the original still standing), <c>cancel</c> (a cancellation card,
+/// the appointment still standing) or <c>sign_in</c> (the sign-in card, nothing changed).
+/// </summary>
+internal sealed record Expectation(string? Professional, string? Service, string? Start, string? Kind)
+{
+	public const string Move = "move";
+
+	public const string Cancel = "cancel";
+
+	public const string SignIn = "sign_in";
+}
 
 /// <summary>
 /// One conversation: what the customer writes, turn by turn. <see cref="DayTurn"/> is the turn that names the day
 /// (1 unless the customer asks something else first); <see cref="ConflictAfterTurn"/>, for a conflict, is when
 /// another customer takes the expected time; <see cref="FirstDay"/> is the day the customer first asks for, which
-/// the assistant must work out from their words.
+/// the assistant must work out from their words. <see cref="Bookings"/> are the customer's own confirmed
+/// appointments before the conversation, and <see cref="SignedIn"/> whether they chat signed in.
 /// </summary>
 internal sealed record Scenario(
 	string Id,
@@ -48,7 +61,9 @@ internal sealed record Scenario(
 	int? DayTurn,
 	int? ConflictAfterTurn,
 	string? FirstDay,
-	Expectation? Expect)
+	Expectation? Expect,
+	bool SignedIn = false,
+	IReadOnlyList<AgendaEntry>? Bookings = null)
 {
 	public const string Conflict = "conflict";
 

@@ -76,11 +76,28 @@ Start a new one, or use the booking form.
 budget (`Assistant:DailyBudgetUsd`) is spent. The booking form keeps working.
 
 ### assistant-too_many_requests
-`assistant.too_many_requests` · 429. More than `AssistantRateLimit:PermitsPerMinute` (10) messages in a minute from one
+`assistant.too_many_requests` · 429. More than `RateLimits:AssistantPerMinute` (10) messages in a minute from one
 visitor. `Retry-After` says when to write again.
 
-## Inbox
+## Sign-in
 
-### inbox-invalid_email
-`inbox.invalid_email` · 400. The in-app inbox is read by the email the booking was made with; what was given is not
-one. (Development only until customers sign in with a code.)
+### signin-invalid_email
+`signin.invalid_email` · 400. Asking for a code needs a plausible email.
+
+### signin-invalid_code
+`signin.invalid_code` · 400. Not the code sent, or no code for that email (the answer is the same). It may be tried
+again until it runs out of attempts.
+
+### signin-code_expired
+`signin.code_expired` · 400. The code expired (10 minutes), was used, or ran out of attempts (5). Ask for a new one.
+
+### signin-required
+`signin.required` · 401. Sign in first: there is no session cookie, or the session ended (2 hours) or belongs to
+another business.
+
+### signin-too_many_requests
+`signin.too_many_requests` · 429. More than `RateLimits:SignInPerMinute` (5) code requests or checks in a minute from
+one visitor.
+
+### signin-unavailable
+`signin.unavailable` · 503. The code could not be emailed. Ask again in a minute.

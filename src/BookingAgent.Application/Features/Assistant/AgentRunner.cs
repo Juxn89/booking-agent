@@ -46,7 +46,9 @@ public sealed record AssistantRequest(Guid? ConversationId, string? Message);
 /// <param name="ConversationId">The conversation, to send with the next message.</param>
 /// <param name="Reply">What the assistant says.</param>
 /// <param name="Holds">Slots it held in this reply, for the widget to show as cards with a Confirmar button.</param>
-public sealed record AssistantReply(Guid ConversationId, string Reply, IReadOnlyList<HoldCard> Holds);
+/// <param name="Cancellations">Cancellations it proposed, for cards with a Cancelar button.</param>
+/// <param name="SignInRequired">Whether the customer must sign in for what they asked: the widget shows the sign-in card.</param>
+public sealed record AssistantReply(Guid ConversationId, string Reply, IReadOnlyList<HoldCard> Holds, IReadOnlyList<CancelCard> Cancellations, bool SignInRequired);
 
 /// <summary>The assistant error codes (docs/errors.md).</summary>
 public static class AssistantErrors
@@ -101,9 +103,10 @@ public sealed class AgentRunner(
 	/// <summary>Answers a message.</summary>
 	/// <param name="businessId">The business the chat is on.</param>
 	/// <param name="request">The message.</param>
+	/// <param name="customer">The signed-in customer, from the session cookie; <see langword="null"/> when not signed in.</param>
 	/// <param name="cancellationToken">Cancellation.</param>
 	/// <returns>The reply, or why there is none.</returns>
-	public async Task<Result<AssistantReply>> HandleAsync(Guid businessId, AssistantRequest request, CancellationToken cancellationToken)
+	public async Task<Result<AssistantReply>> HandleAsync(Guid businessId, AssistantRequest request, Customers.SignedInCustomer? customer, CancellationToken cancellationToken)
 	{
 		ArgumentNullException.ThrowIfNull(request);
 		var settings = options.Value;
@@ -140,7 +143,7 @@ public sealed class AgentRunner(
 		}
 
 		var zone = data.Business.Zone;
-		turn.Begin(conversation.Id, conversation.Turns + 1, new AssistantBusiness(data, zone, now.InZone(zone).Date), settings.MaxCostPerConversationUsd - conversation.CostUsd);
+		turn.Begin(conversation.Id, conversation.Turns + 1, new AssistantBusiness(data, zone, now.InZone(zone).Date), settings.MaxCostPerConversationUsd - conversation.CostUsd, customer);
 
 		var history = JsonSerializer.Deserialize<List<ChatMessage>>(conversation.History, AIJsonUtilities.DefaultOptions) ?? [];
 		var user = new ChatMessage(ChatRole.User, message);
@@ -149,7 +152,7 @@ public sealed class AgentRunner(
 		try
 		{
 			var response = await chat.GetResponseAsync(
-				[new ChatMessage(ChatRole.System, SystemPrompt(turn.Business)), .. history, user],
+				[new ChatMessage(ChatRole.System, SystemPrompt(turn.Business, customer)), .. history, user],
 				new ChatOptions { Tools = tools.All },
 				cancellationToken).ConfigureAwait(false);
 			produced = [.. response.Messages];
@@ -192,10 +195,10 @@ public sealed class AgentRunner(
 			return Error.Conflict(AssistantErrors.Busy, "Another message of this conversation was answered at the same time; send yours again.");
 		}
 
-		return new AssistantReply(conversation.Id, reply, turn.Holds);
+		return new AssistantReply(conversation.Id, reply, turn.Holds, turn.Cancellations, turn.SignInRequested);
 	}
 
-	private static string SystemPrompt(AssistantBusiness business)
+	private static string SystemPrompt(AssistantBusiness business, Customers.SignedInCustomer? customer)
 	{
 		var catalog = business.Catalog;
 		var names = catalog.Services.ToDictionary(static s => s.Id, static s => s.Name);
@@ -203,6 +206,12 @@ public sealed class AgentRunner(
 			.Replace("{business}", catalog.Business.Name, StringComparison.Ordinal)
 			.Replace("{today}", Notifications.NotificationTemplates.When(business.Today.AtMidnight()).Split(" a las ")[0] + $" ({business.Today:yyyy-MM-dd})", StringComparison.Ordinal)
 			.Replace("{zone}", business.Zone.Id, StringComparison.Ordinal)
+			.Replace(
+				"{customer}",
+				customer is null
+					? "The customer is not signed in."
+					: $"The customer is signed in as {customer.Name} ({customer.Email}): use these details for hold_slot without asking for them.",
+				StringComparison.Ordinal)
 			.Replace(
 				"{services}",
 				string.Join('\n', catalog.Services.Select(static s => string.Create(CultureInfo.InvariantCulture, $"- {s.Id.Value} · {s.Name} · {s.Duration.TotalMinutes:0} min · USD {s.Price:0.00}"))),

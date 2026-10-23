@@ -70,7 +70,18 @@ public sealed record AssistantBusiness(CatalogData Catalog, DateTimeZone Zone, L
 /// <param name="ProfessionalName">The professional.</param>
 /// <param name="LocalStart">When, on the business's clock.</param>
 /// <param name="ExpiresAt">Until when it is held.</param>
-public sealed record HoldCard(Guid HoldId, string ConfirmationToken, string ServiceName, string ProfessionalName, LocalDateTime LocalStart, Instant ExpiresAt);
+/// <param name="Replaces">For a move, the booking it replaces once confirmed.</param>
+public sealed record HoldCard(Guid HoldId, string ConfirmationToken, string ServiceName, string ProfessionalName, LocalDateTime LocalStart, Instant ExpiresAt, Guid? Replaces = null);
+
+/// <summary>
+/// A cancellation the assistant proposes, for the widget to show as a card with its own Cancelar button: the
+/// customer cancels, signed in, never the assistant.
+/// </summary>
+/// <param name="BookingId">The booking.</param>
+/// <param name="ServiceName">The service.</param>
+/// <param name="ProfessionalName">The professional.</param>
+/// <param name="LocalStart">When, on the business's clock.</param>
+public sealed record CancelCard(Guid BookingId, string ServiceName, string ProfessionalName, LocalDateTime LocalStart);
 
 /// <summary>
 /// What happens during one reply of the assistant: the model calls and tool calls (with their cost) and the holds
@@ -81,6 +92,7 @@ public sealed class AgentTurn
 {
 	private readonly List<AgentStep> _steps = [];
 	private readonly List<HoldCard> _holds = [];
+	private readonly List<CancelCard> _cancels = [];
 	private AssistantBusiness? _business;
 
 	/// <summary>The conversation.</summary>
@@ -102,6 +114,15 @@ public sealed class AgentTurn
 	/// <summary>The holds made.</summary>
 	public IReadOnlyList<HoldCard> Holds => _holds;
 
+	/// <summary>The cancellations proposed.</summary>
+	public IReadOnlyList<CancelCard> Cancellations => _cancels;
+
+	/// <summary>The signed-in customer, or <see langword="null"/>.</summary>
+	public Customers.SignedInCustomer? Customer { get; private set; }
+
+	/// <summary>Whether a tool needed the customer signed in: the widget then shows the sign-in card.</summary>
+	public bool SignInRequested { get; private set; }
+
 	/// <summary>Input tokens so far.</summary>
 	public long InputTokens { get; private set; }
 
@@ -119,8 +140,10 @@ public sealed class AgentTurn
 	/// <param name="number">The turn's number.</param>
 	/// <param name="business">The business.</param>
 	/// <param name="budget">What it may spend.</param>
-	public void Begin(Guid conversationId, int number, AssistantBusiness business, decimal budget)
+	/// <param name="customer">The signed-in customer, if any.</param>
+	public void Begin(Guid conversationId, int number, AssistantBusiness business, decimal budget, Customers.SignedInCustomer? customer = null)
 	{
+		Customer = customer;
 		ConversationId = conversationId;
 		Number = number;
 		_business = business;
@@ -153,6 +176,13 @@ public sealed class AgentTurn
 	/// <summary>Records a hold for the widget.</summary>
 	/// <param name="card">The hold.</param>
 	public void Held(HoldCard card) => _holds.Add(card);
+
+	/// <summary>Records a proposed cancellation for the widget.</summary>
+	/// <param name="card">The cancellation.</param>
+	public void ProposeCancel(CancelCard card) => _cancels.Add(card);
+
+	/// <summary>Asks the widget to show the sign-in card.</summary>
+	public void RequestSignIn() => SignInRequested = true;
 }
 
 /// <summary>The assistant cannot reach its model: none configured, or the provider failed.</summary>

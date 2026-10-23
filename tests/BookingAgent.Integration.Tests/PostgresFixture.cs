@@ -61,7 +61,11 @@ public sealed class PostgresFixture : IAsyncLifetime
 			.UseSetting($"ConnectionStrings:{DependencyInjection.DatabaseConnectionName}", ConnectionString)
 			// Tests that need expiry or notifications drive ExpireHolds and DispatchNotifications themselves.
 			.UseSetting("Sweeper:Enabled", "false")
-			.UseSetting("Notifications:DispatcherEnabled", "false"));
+			.UseSetting("Notifications:DispatcherEnabled", "false")
+			// Sign-in codes are emailed at once, so the API's SMTP is the test Mailpit.
+			.UseSetting("Smtp:Host", _mailpit.Hostname)
+			.UseSetting("Smtp:Port", _mailpit.GetMappedPublicPort(SmtpPort).ToString(System.Globalization.CultureInfo.InvariantCulture))
+			.UseSetting("Smtp:Security", "None"));
 		await DemoData.SeedAsync(_api.Services);
 	}
 
@@ -118,7 +122,7 @@ public sealed class PostgresFixture : IAsyncLifetime
 	{
 		await using (var db = CreateContext())
 		{
-			await db.Database.ExecuteSqlRawAsync("TRUNCATE agent_steps, agent_conversations, inbox_messages, notifications, bookings, customers");
+			await db.Database.ExecuteSqlRawAsync("TRUNCATE agent_steps, agent_conversations, customer_sessions, sign_in_codes, inbox_messages, notifications, bookings, customers");
 		}
 
 		using var mailpit = new HttpClient { BaseAddress = MailpitApi };

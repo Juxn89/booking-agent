@@ -11,8 +11,9 @@ using NodaTime.Text;
 
 /// <summary>
 /// The assistant's tools. Each one reads or proposes through the same use cases as the form; none confirms,
-/// cancels or moves anything (an architecture test keeps <see cref="ConfirmHold"/> out of this namespace).
-/// Finding, cancelling and moving a customer's own bookings come with the customer's sign-in code (day 7).
+/// cancels or moves anything (an architecture test keeps <see cref="ConfirmHold"/> and <see cref="CancelBooking"/> out
+/// of this namespace).
+/// A customer's own bookings are found, and their cancellation and move proposed, only once they have signed in.
 /// </summary>
 /// <param name="services">Lists the services.</param>
 /// <param name="professionals">Lists the professionals.</param>
@@ -24,10 +25,33 @@ public sealed class BookingTools(
 	ListProfessionalsTool professionals,
 	ResolveDateTool dates,
 	CheckAvailabilityTool availability,
-	HoldSlotTool hold)
+	HoldSlotTool hold,
+	FindMyBookingsTool mine,
+	ProposeCancelTool cancel,
+	ProposeRescheduleTool reschedule)
 {
 	/// <summary>Every tool, in the order the prompt introduces them.</summary>
-	public IList<AITool> All { get; } = [services, professionals, dates, availability, hold];
+	public IList<AITool> All { get; } = [services, professionals, dates, availability, hold, mine, cancel, reschedule];
+}
+
+/// <summary>Pieces of answers several tools give.</summary>
+internal static class ToolAnswers
+{
+	/// <summary>The nearest free starts a refused hold comes with, on the business's clock, for the model to offer.</summary>
+	/// <param name="details">The error's details.</param>
+	/// <param name="zone">The business's clock.</param>
+	/// <returns>Day, time and start of each.</returns>
+	public static IEnumerable<object> Alternatives(IReadOnlyDictionary<string, string>? details, DateTimeZone zone) =>
+		(details?.GetValueOrDefault(BookingErrors.AlternativesDetail) ?? string.Empty)
+			.Split(',', StringSplitOptions.RemoveEmptyEntries)
+			.Select(static text => InstantPattern.General.Parse(text))
+			.Where(static parsed => parsed.Success)
+			.Select(parsed =>
+			{
+				var local = parsed.Value.InZone(zone).LocalDateTime;
+				return (object)new { Day = LocalDatePattern.Iso.Format(local.Date), Time = local.TimeOfDay.ToString("HH:mm", CultureInfo.InvariantCulture), Start = InstantPattern.ExtendedIso.Format(parsed.Value) };
+			})
+			.ToList();
 }
 
 /// <summary>No input.</summary>
@@ -272,7 +296,7 @@ public sealed class HoldSlotTool(AgentTurn turn, IClock clock, HoldSlot useCase)
 				BookingErrors.SlotUnavailable or BookingErrors.SlotTaken => new
 				{
 					Error = "That time is no longer free. Tell the customer and offer these nearest free times instead.",
-					Alternatives = Alternatives(error.Details),
+					Alternatives = ToolAnswers.Alternatives(error.Details, Turn.Business.Zone),
 				},
 				_ => Problem("That professional does not offer that service. Call list_professionals with the service_id to see who does."),
 			};
@@ -293,15 +317,4 @@ public sealed class HoldSlotTool(AgentTurn turn, IClock clock, HoldSlot useCase)
 		};
 	}
 
-	private IEnumerable<object> Alternatives(IReadOnlyDictionary<string, string>? details) =>
-		(details?.GetValueOrDefault(BookingErrors.AlternativesDetail) ?? string.Empty)
-			.Split(',', StringSplitOptions.RemoveEmptyEntries)
-			.Select(static text => InstantPattern.General.Parse(text))
-			.Where(static parsed => parsed.Success)
-			.Select(parsed =>
-			{
-				var local = parsed.Value.InZone(Turn.Business.Zone).LocalDateTime;
-				return (object)new { Day = LocalDatePattern.Iso.Format(local.Date), Time = local.TimeOfDay.ToString("HH:mm", CultureInfo.InvariantCulture), Start = InstantPattern.ExtendedIso.Format(parsed.Value) };
-			})
-			.ToList();
 }

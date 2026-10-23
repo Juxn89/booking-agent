@@ -23,11 +23,12 @@ So far:
   local runs) and to an in-app inbox, retrying failures with a growing wait. A reminder for a booking that is no
   longer on is skipped ([ADR 0004](docs/adr/0004-notifications-through-an-outbox.md)).
 - **API:** `GET /v1/businesses/{id}/catalog`, `GET /v1/professionals/{id}/availability`, `POST /v1/holds`,
-  `POST /v1/holds/{id}/confirm`; in Development, `GET /v1/dev/inbox?email=`. Errors are Problem Details with a
-  stable code ([`docs/errors.md`](docs/errors.md)).
-- **The assistant** (`POST /v1/businesses/{id}/assistant/messages`): Claude Haiku 5.5 with five tools that are thin
+  `POST /v1/holds/{id}/confirm`; signed in, `/v1/businesses/{id}/me/bookings` (list, cancel, reschedule) and
+  `/me/inbox`. Errors are Problem Details with a stable code ([`docs/errors.md`](docs/errors.md)).
+- **The assistant** (`POST /v1/businesses/{id}/assistant/messages`): Claude Haiku 5.5 with eight tools that are thin
   adapters over the form's use cases: list services and professionals, resolve relative dates on the server
-  ("el martes que viene"), check availability and hold a slot. None of them can confirm: the hold's token goes to
+  ("el martes que viene"), check availability and hold a slot; for a signed-in customer, find their appointments and
+  propose to move or cancel one. None of them can confirm or cancel: the hold's token goes to
   the widget's card, never to the model ([ADR 0005](docs/adr/0005-tools-are-adapters-over-the-use-cases.md)). The
   tools are declared `strict`, the history stays on the server, and every model and tool call is recorded with its
   tokens and cost. Spending is capped per reply (8 model calls), per conversation (USD 0.05) and per day, and
@@ -35,11 +36,17 @@ So far:
 - **Chat** (`/chat`): the conversation with the held slot as a card under the assistant's message, with its
   countdown and the Confirmar button. The prompt keeps the assistant to booking: no medical advice, no other
   topics, and the customer's words are never instructions.
-- **Evals** ([`evals/`](evals/README.md)): 25 multi-turn conversations against a real Postgres, scored on the
-  database. Claude Haiku 5.5 holds the right slot in 25/25, confirms none, never holds a time no tool offered, and
-  costs USD 0.0022 per conversation; an oracle run checks the harness in CI for free.
+- **Evals** ([`evals/`](evals/README.md)): 28 multi-turn conversations against a real Postgres, scored on the
+  database. Claude Haiku 5.5 ends 28/28 as expected (holds, moves, cancellation and sign-in cards), changes no booking
+  itself, never holds a time no tool offered, and costs USD 0.0024 per conversation; an oracle run checks the
+  harness in CI for free.
+- **Sign-in with an emailed code** (`/mis-citas`): six digits that work for 10 minutes and once, sent only to an
+  email that has bookings (the answer never says which), and a session in an HttpOnly, SameSite=Strict cookie.
+  Signed in, customers see, move and cancel their appointments, in the page or by asking the assistant. The
+  assistant only proposes: a cancellation is a card with its own button, a move a hold to confirm
+  ([ADR 0006](docs/adr/0006-customers-sign-in-with-an-emailed-code.md)).
 - **Booking form** (`/reservar`): service, professional, day and time, then the held slot with a countdown and a
-  Confirmar button. It calls the same API as the assistant will. The inbox is at `/bandeja`.
+  Confirmar button. It calls the same API as the assistant will. The inbox, behind the sign-in, is at `/bandeja`.
 - **Demo data:** "Clínica Demo" in Managua with three professionals and five services, seeded in Development.
 - **AppHost** (.NET Aspire): Postgres 18, Mailpit, the API and the web app.
 
