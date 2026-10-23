@@ -1,0 +1,36 @@
+{
+  "turns": [
+    {
+      "when": "en la mañana",
+      "steps": [
+        { "call": "resolve_date", "arguments": { "expression": "el lunes" } },
+        {
+          "call": "check_availability",
+          "arguments": {
+            "professional_id": "01920000-0000-7000-8000-000000000101",
+            "service_id": "01920000-0000-7000-8000-000000000202",
+            "date": "{resolve_date.date}"
+          }
+        },
+        { "say": "(ensayo) El lunes la Dra. Ana López tiene libre a las 8:00, 9:00 y 10:00. ¿Cuál prefieres? Necesito también tu nombre y tu correo." }
+      ]
+    },
+    {
+      "when": "a las 10",
+      "steps": [
+        {
+          "call": "hold_slot",
+          "arguments": {
+            "professional_id": "01920000-0000-7000-8000-000000000101",
+            "service_id": "01920000-0000-7000-8000-000000000202",
+            "start": "{check_availability.slots[time=10:00].start}",
+            "customer_name": "Laura Gómez",
+            "customer_email": "laura.gomez@ejemplo.com",
+            "customer_phone": null
+          }
+        },
+        { "say": "(ensayo) Te aparté la limpieza el lunes a las 10:00. Confírmala con el botón Confirmar de la tarjeta." }
+      ]
+    }
+  ]
+}

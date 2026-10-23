@@ -58,7 +58,7 @@
           "turn": 2,
           "tool": "hold_slot",
           "input": "{\"start\": \"2026-11-03T14:00:00Z\", \"service_id\": \"01920000-0000-7000-8000-000000000202\", \"customer_name\": \"Ana Pérez\", \"customer_email\": \"a***@ejemplo.com\", \"customer_phone\": null, \"professional_id\": \"01920000-0000-7000-8000-000000000101\"}",
-          "output": "{\"hold_id\": \"01a16a36-5ca2-7627-a9a5-f7781aea9148\", \"summary\": \"Limpieza dental con Dra. Ana López, martes 3 de noviembre a las 8:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
+          "output": "{\"hold_id\": \"01a16a5d-3297-7505-b891-d6c390d487ff\", \"summary\": \"Limpieza dental con Dra. Ana López, martes 3 de noviembre a las 8:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
         }
       ]
     },
@@ -108,7 +108,7 @@
           "turn": 2,
           "tool": "hold_slot",
           "input": "{\"start\": \"2026-11-04T16:00:00Z\", \"service_id\": \"01920000-0000-7000-8000-000000000201\", \"customer_name\": \"Bruno Díaz\", \"customer_email\": \"b***@ejemplo.com\", \"customer_phone\": null, \"professional_id\": \"01920000-0000-7000-8000-000000000102\"}",
-          "output": "{\"hold_id\": \"01a16a36-5f09-7a16-8657-30f04e9cd358\", \"summary\": \"Consulta general con Dr. Carlos Martínez, miércoles 4 de noviembre a las 10:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
+          "output": "{\"hold_id\": \"01a16a5d-343c-7feb-9a36-684723c90e4a\", \"summary\": \"Consulta general con Dr. Carlos Martínez, miércoles 4 de noviembre a las 10:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
         }
       ]
     },
@@ -158,7 +158,7 @@
           "turn": 2,
           "tool": "hold_slot",
           "input": "{\"start\": \"2026-11-06T22:00:00Z\", \"service_id\": \"01920000-0000-7000-8000-000000000204\", \"customer_name\": \"Carla Ruiz\", \"customer_email\": \"c***@ejemplo.com\", \"customer_phone\": null, \"professional_id\": \"01920000-0000-7000-8000-000000000103\"}",
-          "output": "{\"hold_id\": \"01a16a36-617b-73d1-be21-2c1c57910bb8\", \"summary\": \"Sesión de fisioterapia con Lic. Sofía Rivera, viernes 6 de noviembre a las 16:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
+          "output": "{\"hold_id\": \"01a16a5d-3575-76db-a8d9-7e628d2a9b83\", \"summary\": \"Sesión de fisioterapia con Lic. Sofía Rivera, viernes 6 de noviembre a las 16:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
         }
       ]
     },
@@ -208,7 +208,7 @@
           "turn": 2,
           "tool": "hold_slot",
           "input": "{\"start\": \"2026-11-07T16:00:00Z\", \"service_id\": \"01920000-0000-7000-8000-000000000205\", \"customer_name\": \"Diego Mora\", \"customer_email\": \"d***@ejemplo.com\", \"customer_phone\": null, \"professional_id\": \"01920000-0000-7000-8000-000000000103\"}",
-          "output": "{\"hold_id\": \"01a16a36-641f-7e0a-98fb-e9d48a1d8d6d\", \"summary\": \"Masaje terapéutico con Lic. Sofía Rivera, sábado 7 de noviembre a las 10:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
+          "output": "{\"hold_id\": \"01a16a5d-36ab-773d-ab46-8a723fe7c40e\", \"summary\": \"Masaje terapéutico con Lic. Sofía Rivera, sábado 7 de noviembre a las 10:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
         }
       ]
     },
@@ -258,7 +258,7 @@
           "turn": 2,
           "tool": "hold_slot",
           "input": "{\"start\": \"2026-11-12T20:30:00Z\", \"service_id\": \"01920000-0000-7000-8000-000000000203\", \"customer_name\": \"Elena Castro\", \"customer_email\": \"e***@ejemplo.com\", \"customer_phone\": null, \"professional_id\": \"01920000-0000-7000-8000-000000000101\"}",
-          "output": "{\"hold_id\": \"01a16a36-666b-7687-9fd8-9b5fe94f4c38\", \"summary\": \"Control de ortodoncia con Dra. Ana López, jueves 12 de noviembre a las 14:30\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
+          "output": "{\"hold_id\": \"01a16a5d-37e0-7d5d-a5f5-51f4400f0f2c\", \"summary\": \"Control de ortodoncia con Dra. Ana López, jueves 12 de noviembre a las 14:30\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
         }
       ]
     },
@@ -308,7 +308,7 @@
           "turn": 2,
           "tool": "hold_slot",
           "input": "{\"start\": \"2026-11-07T15:00:00Z\", \"service_id\": \"01920000-0000-7000-8000-000000000201\", \"customer_name\": \"Fernando Gil\", \"customer_email\": \"f***@ejemplo.com\", \"customer_phone\": null, \"professional_id\": \"01920000-0000-7000-8000-000000000102\"}",
-          "output": "{\"hold_id\": \"01a16a36-68a9-715d-8661-766f55f7d41c\", \"summary\": \"Consulta general con Dr. Carlos Martínez, sábado 7 de noviembre a las 9:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
+          "output": "{\"hold_id\": \"01a16a5d-3921-715e-bd5d-5e527a1d1be7\", \"summary\": \"Consulta general con Dr. Carlos Martínez, sábado 7 de noviembre a las 9:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
         }
       ]
     },
@@ -358,7 +358,7 @@
           "turn": 2,
           "tool": "hold_slot",
           "input": "{\"start\": \"2026-11-10T17:00:00Z\", \"service_id\": \"01920000-0000-7000-8000-000000000202\", \"customer_name\": \"Gabriela León\", \"customer_email\": \"g***@ejemplo.com\", \"customer_phone\": null, \"professional_id\": \"01920000-0000-7000-8000-000000000101\"}",
-          "output": "{\"hold_id\": \"01a16a36-6ab0-7f91-958c-b99ad9fa4d16\", \"summary\": \"Limpieza dental con Dra. Ana López, martes 10 de noviembre a las 11:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
+          "output": "{\"hold_id\": \"01a16a5d-3a65-78d3-997d-c7ac2720593c\", \"summary\": \"Limpieza dental con Dra. Ana López, martes 10 de noviembre a las 11:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
         }
       ]
     },
@@ -408,7 +408,7 @@
           "turn": 2,
           "tool": "hold_slot",
           "input": "{\"start\": \"2026-11-02T17:00:00Z\", \"service_id\": \"01920000-0000-7000-8000-000000000201\", \"customer_name\": \"Hugo Vega\", \"customer_email\": \"h***@ejemplo.com\", \"customer_phone\": null, \"professional_id\": \"01920000-0000-7000-8000-000000000102\"}",
-          "output": "{\"hold_id\": \"01a16a36-6d0a-77b8-9aaa-813fe3979817\", \"summary\": \"Consulta general con Dr. Carlos Martínez, lunes 2 de noviembre a las 11:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
+          "output": "{\"hold_id\": \"01a16a5d-3bad-7d26-a17a-76478571c3ac\", \"summary\": \"Consulta general con Dr. Carlos Martínez, lunes 2 de noviembre a las 11:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
         }
       ]
     },
@@ -458,7 +458,7 @@
           "turn": 2,
           "tool": "hold_slot",
           "input": "{\"start\": \"2026-11-05T23:00:00Z\", \"service_id\": \"01920000-0000-7000-8000-000000000204\", \"customer_name\": \"Irene Soto\", \"customer_email\": \"i***@ejemplo.com\", \"customer_phone\": null, \"professional_id\": \"01920000-0000-7000-8000-000000000103\"}",
-          "output": "{\"hold_id\": \"01a16a36-7142-7f82-ac97-f064ecad822d\", \"summary\": \"Sesión de fisioterapia con Lic. Sofía Rivera, jueves 5 de noviembre a las 17:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
+          "output": "{\"hold_id\": \"01a16a5d-3ceb-74b1-b3e5-94ebff911a6c\", \"summary\": \"Sesión de fisioterapia con Lic. Sofía Rivera, jueves 5 de noviembre a las 17:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
         }
       ]
     },
@@ -508,7 +508,7 @@
           "turn": 2,
           "tool": "hold_slot",
           "input": "{\"start\": \"2026-11-04T21:00:00Z\", \"service_id\": \"01920000-0000-7000-8000-000000000205\", \"customer_name\": \"Jorge Ríos\", \"customer_email\": \"j***@ejemplo.com\", \"customer_phone\": null, \"professional_id\": \"01920000-0000-7000-8000-000000000103\"}",
-          "output": "{\"hold_id\": \"01a16a36-7487-7144-bee2-cc6efb7c3b63\", \"summary\": \"Masaje terapéutico con Lic. Sofía Rivera, miércoles 4 de noviembre a las 15:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
+          "output": "{\"hold_id\": \"01a16a5d-3e2b-7443-8129-8f0410738b93\", \"summary\": \"Masaje terapéutico con Lic. Sofía Rivera, miércoles 4 de noviembre a las 15:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
         }
       ]
     },
@@ -566,7 +566,7 @@
           "turn": 3,
           "tool": "hold_slot",
           "input": "{\"start\": \"2026-11-05T15:00:00Z\", \"service_id\": \"01920000-0000-7000-8000-000000000202\", \"customer_name\": \"Karla Núñez\", \"customer_email\": \"k***@ejemplo.com\", \"customer_phone\": null, \"professional_id\": \"01920000-0000-7000-8000-000000000101\"}",
-          "output": "{\"hold_id\": \"01a16a36-780e-7658-a3c3-6f08de2aa6a2\", \"summary\": \"Limpieza dental con Dra. Ana López, jueves 5 de noviembre a las 9:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
+          "output": "{\"hold_id\": \"01a16a5d-3f9d-7710-a337-077dcce19f7f\", \"summary\": \"Limpieza dental con Dra. Ana López, jueves 5 de noviembre a las 9:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
         }
       ]
     },
@@ -616,7 +616,7 @@
           "turn": 2,
           "tool": "hold_slot",
           "input": "{\"start\": \"2026-11-03T14:00:00Z\", \"service_id\": \"01920000-0000-7000-8000-000000000202\", \"customer_name\": \"Luis Paz\", \"customer_email\": \"l***@ejemplo.com\", \"customer_phone\": null, \"professional_id\": \"01920000-0000-7000-8000-000000000101\"}",
-          "output": "{\"hold_id\": \"01a16a36-7ab3-7d5b-b9f4-b50d3b59605f\", \"summary\": \"Limpieza dental con Dra. Ana López, martes 3 de noviembre a las 8:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
+          "output": "{\"hold_id\": \"01a16a5d-4114-7a61-b426-1a8a9c3fc13f\", \"summary\": \"Limpieza dental con Dra. Ana López, martes 3 de noviembre a las 8:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
         }
       ]
     },
@@ -672,7 +672,7 @@
           "turn": 2,
           "tool": "hold_slot",
           "input": "{\"start\": \"2026-11-06T14:00:00Z\", \"service_id\": \"01920000-0000-7000-8000-000000000201\", \"customer_name\": \"Marta Solís\", \"customer_email\": \"m***@ejemplo.com\", \"customer_phone\": null, \"professional_id\": \"01920000-0000-7000-8000-000000000102\"}",
-          "output": "{\"hold_id\": \"01a16a36-7d92-79b8-9315-98df28878d51\", \"summary\": \"Consulta general con Dr. Carlos Martínez, viernes 6 de noviembre a las 8:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
+          "output": "{\"hold_id\": \"01a16a5d-4294-7a37-b712-dc62743af498\", \"summary\": \"Consulta general con Dr. Carlos Martínez, viernes 6 de noviembre a las 8:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
         }
       ]
     },
@@ -728,7 +728,7 @@
           "turn": 2,
           "tool": "hold_slot",
           "input": "{\"start\": \"2026-11-09T14:00:00Z\", \"service_id\": \"01920000-0000-7000-8000-000000000202\", \"customer_name\": \"Nicolás Ortiz\", \"customer_email\": \"n***@ejemplo.com\", \"customer_phone\": null, \"professional_id\": \"01920000-0000-7000-8000-000000000101\"}",
-          "output": "{\"hold_id\": \"01a16a36-8099-72f6-bc5b-e578f6de1f1c\", \"summary\": \"Limpieza dental con Dra. Ana López, lunes 9 de noviembre a las 8:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
+          "output": "{\"hold_id\": \"01a16a5d-4424-7617-b6f5-599bfce95b55\", \"summary\": \"Limpieza dental con Dra. Ana López, lunes 9 de noviembre a las 8:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
         }
       ]
     },
@@ -778,7 +778,7 @@
           "turn": 2,
           "tool": "hold_slot",
           "input": "{\"start\": \"2026-11-03T17:00:00Z\", \"service_id\": \"01920000-0000-7000-8000-000000000204\", \"customer_name\": \"Olga Ramos\", \"customer_email\": \"o***@ejemplo.com\", \"customer_phone\": null, \"professional_id\": \"01920000-0000-7000-8000-000000000103\"}",
-          "output": "{\"hold_id\": \"01a16a36-8333-7b40-b6a9-a14fa0b1dfb3\", \"summary\": \"Sesión de fisioterapia con Lic. Sofía Rivera, martes 3 de noviembre a las 11:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
+          "output": "{\"hold_id\": \"01a16a5d-45ab-7dec-beb9-3ea8e8caa0a7\", \"summary\": \"Sesión de fisioterapia con Lic. Sofía Rivera, martes 3 de noviembre a las 11:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
         }
       ]
     },
@@ -828,7 +828,7 @@
           "turn": 2,
           "tool": "hold_slot",
           "input": "{\"start\": \"2026-11-04T22:30:00Z\", \"service_id\": \"01920000-0000-7000-8000-000000000203\", \"customer_name\": \"María Fuentes\", \"customer_email\": \"m***@ejemplo.com\", \"customer_phone\": null, \"professional_id\": \"01920000-0000-7000-8000-000000000101\"}",
-          "output": "{\"hold_id\": \"01a16a36-8525-7afc-9252-ef6d92ac372e\", \"summary\": \"Control de ortodoncia con Dra. Ana López, miércoles 4 de noviembre a las 16:30\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
+          "output": "{\"hold_id\": \"01a16a5d-4747-77a3-9272-68af7e2cf40d\", \"summary\": \"Control de ortodoncia con Dra. Ana López, miércoles 4 de noviembre a las 16:30\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
         }
       ]
     },
@@ -878,7 +878,7 @@
           "turn": 2,
           "tool": "hold_slot",
           "input": "{\"start\": \"2026-11-27T18:00:00Z\", \"service_id\": \"01920000-0000-7000-8000-000000000201\", \"customer_name\": \"Pablo Herrera\", \"customer_email\": \"p***@ejemplo.com\", \"customer_phone\": null, \"professional_id\": \"01920000-0000-7000-8000-000000000102\"}",
-          "output": "{\"hold_id\": \"01a16a36-8708-7a05-b2b1-f395990660ab\", \"summary\": \"Consulta general con Dr. Carlos Martínez, viernes 27 de noviembre a las 12:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
+          "output": "{\"hold_id\": \"01a16a5d-48a7-73c2-a652-2d3de2ac8ed0\", \"summary\": \"Consulta general con Dr. Carlos Martínez, viernes 27 de noviembre a las 12:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
         }
       ]
     },
@@ -942,7 +942,7 @@
           "turn": 3,
           "tool": "hold_slot",
           "input": "{\"start\": \"2026-11-03T14:00:00Z\", \"service_id\": \"01920000-0000-7000-8000-000000000202\", \"customer_name\": \"Quique Lara\", \"customer_email\": \"q***@ejemplo.com\", \"customer_phone\": null, \"professional_id\": \"01920000-0000-7000-8000-000000000101\"}",
-          "output": "{\"hold_id\": \"01a16a36-8954-7eef-ad35-91e146b15b7b\", \"summary\": \"Limpieza dental con Dra. Ana López, martes 3 de noviembre a las 8:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
+          "output": "{\"hold_id\": \"01a16a5d-4b5c-72ef-ba3c-fd3c41bba1b7\", \"summary\": \"Limpieza dental con Dra. Ana López, martes 3 de noviembre a las 8:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
         }
       ]
     },
@@ -1006,7 +1006,7 @@
           "turn": 3,
           "tool": "hold_slot",
           "input": "{\"start\": \"2026-11-06T14:30:00Z\", \"service_id\": \"01920000-0000-7000-8000-000000000201\", \"customer_name\": \"Rosa Méndez\", \"customer_email\": \"r***@ejemplo.com\", \"customer_phone\": null, \"professional_id\": \"01920000-0000-7000-8000-000000000102\"}",
-          "output": "{\"hold_id\": \"01a16a36-8de1-7dbf-a8a3-fd10f60dcf11\", \"summary\": \"Consulta general con Dr. Carlos Martínez, viernes 6 de noviembre a las 8:30\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
+          "output": "{\"hold_id\": \"01a16a5d-4d40-7e3e-8e0c-ea6a0ece7285\", \"summary\": \"Consulta general con Dr. Carlos Martínez, viernes 6 de noviembre a las 8:30\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
         }
       ]
     },
@@ -1070,7 +1070,7 @@
           "turn": 3,
           "tool": "hold_slot",
           "input": "{\"start\": \"2026-11-07T15:00:00Z\", \"service_id\": \"01920000-0000-7000-8000-000000000204\", \"customer_name\": \"Sergio Luna\", \"customer_email\": \"s***@ejemplo.com\", \"customer_phone\": null, \"professional_id\": \"01920000-0000-7000-8000-000000000103\"}",
-          "output": "{\"hold_id\": \"01a16a36-94fe-7066-bd99-70086edc0182\", \"summary\": \"Sesión de fisioterapia con Lic. Sofía Rivera, sábado 7 de noviembre a las 9:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
+          "output": "{\"hold_id\": \"01a16a5d-4ef7-79e2-905e-17bd32481ae5\", \"summary\": \"Sesión de fisioterapia con Lic. Sofía Rivera, sábado 7 de noviembre a las 9:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
         }
       ]
     },
@@ -1134,7 +1134,7 @@
           "turn": 3,
           "tool": "hold_slot",
           "input": "{\"start\": \"2026-11-05T21:00:00Z\", \"service_id\": \"01920000-0000-7000-8000-000000000205\", \"customer_name\": \"Teresa Rojas\", \"customer_email\": \"t***@ejemplo.com\", \"customer_phone\": null, \"professional_id\": \"01920000-0000-7000-8000-000000000103\"}",
-          "output": "{\"hold_id\": \"01a16a36-987b-71a3-baf7-de6055daae7d\", \"summary\": \"Masaje terapéutico con Lic. Sofía Rivera, jueves 5 de noviembre a las 15:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
+          "output": "{\"hold_id\": \"01a16a5d-50cf-75c5-bb82-c33c15712642\", \"summary\": \"Masaje terapéutico con Lic. Sofía Rivera, jueves 5 de noviembre a las 15:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
         }
       ]
     },
@@ -1198,7 +1198,7 @@
           "turn": 3,
           "tool": "hold_slot",
           "input": "{\"start\": \"2026-11-09T20:30:00Z\", \"service_id\": \"01920000-0000-7000-8000-000000000203\", \"customer_name\": \"Ulises Cano\", \"customer_email\": \"u***@ejemplo.com\", \"customer_phone\": null, \"professional_id\": \"01920000-0000-7000-8000-000000000101\"}",
-          "output": "{\"hold_id\": \"01a16a36-9b58-7343-94c0-1269537c85b9\", \"summary\": \"Control de ortodoncia con Dra. Ana López, lunes 9 de noviembre a las 14:30\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
+          "output": "{\"hold_id\": \"01a16a5d-532d-7b5a-b9b8-c428e0f24500\", \"summary\": \"Control de ortodoncia con Dra. Ana López, lunes 9 de noviembre a las 14:30\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
         }
       ]
     },
@@ -1236,7 +1236,7 @@
           "turn": 1,
           "tool": "find_my_bookings",
           "input": "{}",
-          "output": "{\"bookings\": [{\"date\": \"2026-11-03\", \"when\": \"martes 3 de noviembre a las 15:00\", \"service\": \"Limpieza dental\", \"booking_id\": \"01a16a36-9d3c-7056-967b-5def71689d47\", \"can_change\": true, \"service_id\": \"01920000-0000-7000-8000-000000000202\", \"professional\": \"Dra. Ana López\", \"professional_id\": \"01920000-0000-7000-8000-000000000101\"}]}"
+          "output": "{\"bookings\": [{\"date\": \"2026-11-03\", \"when\": \"martes 3 de noviembre a las 15:00\", \"service\": \"Limpieza dental\", \"booking_id\": \"01a16a5d-5486-757c-8994-2ebd84d8e900\", \"can_change\": true, \"service_id\": \"01920000-0000-7000-8000-000000000202\", \"professional\": \"Dra. Ana López\", \"professional_id\": \"01920000-0000-7000-8000-000000000101\"}]}"
         },
         {
           "turn": 1,
@@ -1253,8 +1253,8 @@
         {
           "turn": 1,
           "tool": "propose_reschedule",
-          "input": "{\"start\": \"2026-11-05T16:00:00Z\", \"booking_id\": \"01a16a36-9d3c-7056-967b-5def71689d47\"}",
-          "output": "{\"hold_id\": \"01a16a36-9ebe-7ae7-befe-787dd24ae189\", \"summary\": \"Limpieza dental con Dra. Ana López: de martes 3 de noviembre a las 15:00 a jueves 5 de noviembre a las 10:00\", \"next_step\": \"Tell the customer the new time is held and that the change happens when they press Confirmar on the card below; until then the original appointment stands. You cannot confirm it.\"}"
+          "input": "{\"start\": \"2026-11-05T16:00:00Z\", \"booking_id\": \"01a16a5d-5486-757c-8994-2ebd84d8e900\"}",
+          "output": "{\"hold_id\": \"01a16a5d-5549-763f-9628-7fe7a392e9d8\", \"summary\": \"Limpieza dental con Dra. Ana López: de martes 3 de noviembre a las 15:00 a jueves 5 de noviembre a las 10:00\", \"next_step\": \"Tell the customer the new time is held and that the change happens when they press Confirmar on the card below; until then the original appointment stands. You cannot confirm it.\"}"
         }
       ]
     },
@@ -1292,12 +1292,12 @@
           "turn": 1,
           "tool": "find_my_bookings",
           "input": "{}",
-          "output": "{\"bookings\": [{\"date\": \"2026-11-04\", \"when\": \"miércoles 4 de noviembre a las 9:00\", \"service\": \"Control de ortodoncia\", \"booking_id\": \"01a16a36-a0de-73c4-aa9f-72ea5a4c490b\", \"can_change\": true, \"service_id\": \"01920000-0000-7000-8000-000000000203\", \"professional\": \"Dra. Ana López\", \"professional_id\": \"01920000-0000-7000-8000-000000000101\"}]}"
+          "output": "{\"bookings\": [{\"date\": \"2026-11-04\", \"when\": \"miércoles 4 de noviembre a las 9:00\", \"service\": \"Control de ortodoncia\", \"booking_id\": \"01a16a5d-5696-7eed-912d-6d05c1155e9f\", \"can_change\": true, \"service_id\": \"01920000-0000-7000-8000-000000000203\", \"professional\": \"Dra. Ana López\", \"professional_id\": \"01920000-0000-7000-8000-000000000101\"}]}"
         },
         {
           "turn": 1,
           "tool": "propose_cancel",
-          "input": "{\"booking_id\": \"01a16a36-a0de-73c4-aa9f-72ea5a4c490b\"}",
+          "input": "{\"booking_id\": \"01a16a5d-5696-7eed-912d-6d05c1155e9f\"}",
           "output": "{\"summary\": \"Control de ortodoncia con Dra. Ana López, miércoles 4 de noviembre a las 9:00\", \"next_step\": \"Tell the customer to press Cancelar cita on the card below if they want to cancel it. You cannot cancel it yourself.\"}"
         }
       ]
@@ -1432,7 +1432,7 @@
           "turn": 2,
           "tool": "hold_slot",
           "input": "{\"start\": \"2026-11-05T16:00:00Z\", \"service_id\": \"01920000-0000-7000-8000-000000000202\", \"customer_name\": \"Ximena Ugarte\", \"customer_email\": \"x***@ejemplo.com\", \"customer_phone\": null, \"professional_id\": \"01920000-0000-7000-8000-000000000101\"}",
-          "output": "{\"hold_id\": \"01a16a36-a740-7169-8f37-7dcbbf2eabff\", \"summary\": \"Limpieza dental con Dra. Ana López, jueves 5 de noviembre a las 10:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
+          "output": "{\"hold_id\": \"01a16a5d-5bec-7372-8e83-2cc6e1ba4b05\", \"summary\": \"Limpieza dental con Dra. Ana López, jueves 5 de noviembre a las 10:00\", \"next_step\": \"Tell the customer the time is held for them and that they confirm it with the Confirmar button on the card below. You cannot confirm it.\", \"held_for_minutes\": 5}"
         }
       ]
     }

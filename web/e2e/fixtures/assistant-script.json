@@ -1,0 +1,30 @@
+{
+  "turns": [
+    {
+      "when": "limpieza",
+      "steps": [
+        { "call": "resolve_date", "arguments": { "expression": "el lunes" } },
+        {
+          "call": "check_availability",
+          "arguments": {
+            "professional_id": "01920000-0000-7000-8000-000000000101",
+            "service_id": "01920000-0000-7000-8000-000000000202",
+            "date": "{resolve_date.date}"
+          }
+        },
+        {
+          "call": "hold_slot",
+          "arguments": {
+            "professional_id": "01920000-0000-7000-8000-000000000101",
+            "service_id": "01920000-0000-7000-8000-000000000202",
+            "start": "{check_availability.slots[time=10:00].start}",
+            "customer_name": "Ana Prueba",
+            "customer_email": "ana.e2e@ejemplo.com",
+            "customer_phone": null
+          }
+        },
+        { "say": "Listo, Ana: te aparté la limpieza dental con la Dra. Ana López el lunes a las 10:00. Confírmala con el botón Confirmar de la tarjeta." }
+      ]
+    }
+  ]
+}

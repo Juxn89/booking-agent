@@ -50,6 +50,9 @@ So far:
   and open on their "why": the conversation and every model and tool call, with time, tokens and cost. It opens
   with the staff's access key (`PANEL_ACCESS_KEY` in `.env`), into a sealed HttpOnly cookie
   ([ADR 0007](docs/adr/0007-the-panel-live-over-signalr.md)).
+- **End to end** (`web/e2e`): Playwright drives the chat, the card, the live panel, the emailed code, the
+  cancellation and the inbox against the real API, Postgres and Mailpit, with a scripted assistant; CI runs it on
+  every push. The demo video ([`docs/demo`](docs/demo/README.md)) is the same flow with Claude.
 - **Booking form** (`/reservar`): service, professional, day and time, then the held slot with a countdown and a
   Confirmar button. It calls the same API as the assistant will. The inbox, behind the sign-in, is at `/bandeja`.
 - **Demo data:** "Clínica Demo" in Managua with three professionals and five services, seeded in Development.
@@ -61,6 +64,7 @@ cp .env.template .env                               # once; an Anthropic key for
 dotnet run --project src/BookingAgent.AppHost       # Postgres, Mailpit (http://localhost:8030), API and web (http://localhost:3020)
 dotnet test                                         # domain, application, architecture and integration (needs Docker)
 dotnet run --project evals/BookingAgent.Evals -- run oracle   # the evals' harness (needs Docker)
+(cd web && pnpm e2e:deps && pnpm e2e)                 # end to end with a scripted assistant: chat, panel, sign-in
 ```
 
 Rules for contributors and agents are in [`AGENTS.md`](AGENTS.md).

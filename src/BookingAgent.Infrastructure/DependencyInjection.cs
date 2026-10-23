@@ -23,6 +23,12 @@ using NodaTime;
 /// <summary>Wires the adapters and the use cases.</summary>
 public static class DependencyInjection
 {
+	/// <summary>Whether the assistant plays a script instead of calling the model (end-to-end tests only).</summary>
+	/// <param name="configuration">The configuration.</param>
+	/// <returns><see langword="true"/> when a script is configured.</returns>
+	public static bool UsesScriptedAssistant(IConfiguration configuration) =>
+		!string.IsNullOrEmpty(configuration?[$"{AssistantScriptOptions.SectionName}:{nameof(AssistantScriptOptions.File)}"]);
+
 	/// <summary>Connection string name. Aspire injects it as <c>ConnectionStrings__bookingsdb</c>.</summary>
 	public const string DatabaseConnectionName = "bookingsdb";
 
@@ -49,6 +55,7 @@ public static class DependencyInjection
 		AddOptions<AssistantOptions>(services, configuration, AssistantOptions.SectionName);
 		AddOptions<AnthropicOptions>(services, configuration, AnthropicOptions.SectionName);
 		AddOptions<SignInOptions>(services, configuration, SignInOptions.SectionName);
+		AddOptions<AssistantScriptOptions>(services, configuration, AssistantScriptOptions.SectionName);
 
 		services.AddScoped<IAvailabilitySource, AvailabilitySource>();
 		services.AddScoped<IBookingRepository, BookingRepository>();
@@ -86,9 +93,11 @@ public static class DependencyInjection
 		// request around the request's turn.
 		services.AddKeyedSingleton<IChatClient>(
 			AssistantPipeline.ModelKey,
-			static (provider, _) => AssistantPipeline.CreateModel(
-				provider.GetRequiredService<IOptions<AnthropicOptions>>().Value,
-				provider.GetRequiredService<IOptions<AssistantOptions>>().Value));
+			static (provider, _) => provider.GetRequiredService<IOptions<AssistantScriptOptions>>().Value.File is { Length: > 0 } script
+				? new ScriptedAssistantModel(script)
+				: AssistantPipeline.CreateModel(
+					provider.GetRequiredService<IOptions<AnthropicOptions>>().Value,
+					provider.GetRequiredService<IOptions<AssistantOptions>>().Value));
 		services.AddScoped<AgentTurn>();
 		services.AddScoped<IChatClient>(static provider => AssistantPipeline.Build(
 			provider.GetRequiredKeyedService<IChatClient>(AssistantPipeline.ModelKey),

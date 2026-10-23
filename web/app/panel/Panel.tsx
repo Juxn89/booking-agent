@@ -37,7 +37,7 @@ export function Panel() {
 	const [week, setWeek] = useState(() => mondayOf(todayIn(ZONE)));
 	const [calendar, setCalendar] = useState<PanelCalendar | null>(null);
 	const [professionalId, setProfessionalId] = useState<string | null>(null);
-	const [selected, setSelected] = useState<PanelBooking | null>(null);
+	const [selectedId, setSelectedId] = useState<string | null>(null);
 	const [fresh, setFresh] = useState<Set<string>>(new Set());
 	const [live, setLive] = useState<Live>("connecting");
 	const [version, setVersion] = useState(0);
@@ -102,6 +102,8 @@ export function Panel() {
 		() => (calendar?.bookings ?? []).filter((b) => b.professionalId === shownProfessional),
 		[calendar, shownProfessional],
 	);
+	// The selection is read from the latest calendar: a booking cancelled or moved elsewhere closes its details.
+	const selected = bookings.find((b) => b.id === selectedId) ?? null;
 
 	if (session === "checking") {
 		return <p className="text-muted" role="status">Cargando…</p>;
@@ -154,7 +156,7 @@ export function Panel() {
 						aria-selected={p.id === shownProfessional}
 						onClick={() => {
 							setProfessionalId(p.id);
-							setSelected(null);
+							setSelectedId(null);
 						}}
 						className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${
 							p.id === shownProfessional ? "border-brand bg-brand text-white" : "border-line bg-card hover:border-brand"
@@ -166,12 +168,12 @@ export function Panel() {
 			</div>
 
 			<div className="grid gap-4 lg:grid-cols-[1fr_22rem]">
-				<Week week={week} today={today} bookings={bookings} fresh={fresh} selected={selected} onSelect={setSelected} />
+				<Week week={week} today={today} bookings={bookings} fresh={fresh} selected={selected} onSelect={(booking) => setSelectedId(booking.id)} />
 				<Details
 					key={selected?.id ?? "none"}
 					booking={selected}
 					onCancelled={() => {
-						setSelected(null);
+						setSelectedId(null);
 						refresh();
 					}}
 				/>

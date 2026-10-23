@@ -8,7 +8,10 @@
     "build": "next build",
     "start": "next start --port 3020",
     "lint": "eslint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "e2e": "playwright test",
+    "e2e:deps": "docker run --rm -d --name booking-agent-e2e-db -p 5434:5432 -e POSTGRES_PASSWORD=postgres postgres:18.6-alpine && docker run --rm -d --name booking-agent-e2e-mail -p 1026:1025 -p 8026:8025 axllent/mailpit:v1.31.2",
+    "demo": "playwright test --config playwright.demo.config.ts"
   },
   "dependencies": {
     "@microsoft/signalr": "10.0.11",
@@ -18,6 +21,7 @@
     "react-dom": "19.3.0"
   },
   "devDependencies": {
+    "@playwright/test": "1.64.0",
     "@tailwindcss/postcss": "4.3.3",
     "@types/node": "24.19.1",
     "@types/react": "19.3.0",

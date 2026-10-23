@@ -9,6 +9,12 @@ using NodaTime.Serialization.SystemTextJson;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// A scripted assistant answers anyone with whatever the script says: it exists for the end-to-end tests only.
+if (DependencyInjection.UsesScriptedAssistant(builder.Configuration) && !builder.Environment.IsDevelopment())
+{
+	throw new InvalidOperationException("AssistantScript:File is set outside Development: the scripted assistant is for the end-to-end tests only.");
+}
+
 builder.AddServiceDefaults();
 builder.Services.AddProblemDetails();
 

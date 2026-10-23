@@ -240,6 +240,17 @@ public sealed class AssistantTests(PostgresFixture fixture) : IAsyncLifetime
 	}
 
 	[Fact]
+	public void The_scripted_assistant_is_refused_outside_development()
+	{
+		// The fixture's API runs as "Testing": a script there must stop it from starting.
+		using var api = fixture.Api.WithWebHostBuilder(static host => host.UseSetting("AssistantScript:File", "script.json"));
+
+		var refused = Assert.ThrowsAny<Exception>(() => api.CreateClient());
+
+		Assert.Contains("AssistantScript:File is set outside Development", refused.ToString(), StringComparison.Ordinal);
+	}
+
+	[Fact]
 	public async Task Requests_to_anthropic_declare_the_tools_strict_with_low_effort_and_failures_become_unavailable()
 	{
 		using var handler = new CapturingHandler();
