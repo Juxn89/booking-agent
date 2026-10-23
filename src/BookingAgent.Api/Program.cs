@@ -1,5 +1,7 @@
 using System.Text.Json.Serialization;
 using BookingAgent.Api.Endpoints;
+using BookingAgent.Api.Panel;
+using BookingAgent.Application.Features.Panel;
 using BookingAgent.Infrastructure;
 using BookingAgent.Infrastructure.Persistence;
 using NodaTime;
@@ -18,6 +20,14 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 });
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddRateLimits(builder.Configuration);
+
+// The business's panel: sessions sealed with Data Protection, live updates over SignalR.
+builder.Services.Configure<PanelOptions>(builder.Configuration.GetSection(PanelOptions.SectionName));
+// Keys on the local file system for one instance; several would share them (a volume or a database).
+builder.Services.AddDataProtection();
+builder.Services.AddSingleton<PanelSessions>();
+builder.Services.AddSignalR();
+builder.Services.AddSingleton<ICalendarUpdates, SignalRCalendarUpdates>();
 
 var app = builder.Build();
 
@@ -43,6 +53,7 @@ app.MapCatalogEndpoints();
 app.MapBookingEndpoints();
 app.MapAssistantEndpoints();
 app.MapCustomerEndpoints();
+app.MapPanelEndpoints();
 
 await app.RunAsync();
 

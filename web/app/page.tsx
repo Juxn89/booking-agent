@@ -1,6 +1,5 @@
 import Link from "next/link";
 
-// The business's panel arrives on day 8 (plan §10).
 export default function Home() {
 	return (
 		<section className="rounded-xl border border-line bg-card p-8 shadow-sm">
@@ -22,6 +21,13 @@ export default function Home() {
 					Ver mi bandeja
 				</Link>
 			</div>
+			<p className="mt-8 border-t border-line pt-4 text-sm text-muted">
+				¿Trabajas en la clínica?{" "}
+				<Link href="/panel" className="font-medium text-brand underline-offset-2 hover:underline">
+					Abre el panel
+				</Link>
+				.
+			</p>
 		</section>
 	);
 }

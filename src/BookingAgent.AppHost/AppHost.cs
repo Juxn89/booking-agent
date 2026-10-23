@@ -1,6 +1,7 @@
 const int WebPort = 3020;
 const int MailpitHttpPort = 8030;
 const string AnthropicKey = "ANTHROPIC_API_KEY";
+const string PanelKey = "PANEL_ACCESS_KEY";
 
 var builder = DistributedApplication.CreateBuilder(args);
 
@@ -32,6 +33,13 @@ var api = builder.AddProject<Projects.BookingAgent_Api>("api")
 if ((Environment.GetEnvironmentVariable(AnthropicKey) ?? DotEnv(Path.Combine(builder.AppHostDirectory, "..", "..", ".env"), AnthropicKey)) is { Length: > 0 } key)
 {
 	api.WithEnvironment("Anthropic__ApiKey", builder.AddParameter("anthropic-api-key", key, secret: true));
+}
+
+// The business's panel opens with the staff's access key, from the environment or the .env; without one it stays
+// closed.
+if ((Environment.GetEnvironmentVariable(PanelKey) ?? DotEnv(Path.Combine(builder.AppHostDirectory, "..", "..", ".env"), PanelKey)) is { Length: > 0 } panelKey)
+{
+	api.WithEnvironment("Panel__AccessKey", builder.AddParameter("panel-access-key", panelKey, secret: true));
 }
 
 // The web app on http://localhost:3020, /api forwarded to the API wherever Aspire runs it. Aspire's proxy holds

@@ -64,6 +64,40 @@ export type MyBooking = {
 	canChange: boolean;
 };
 
+// The business's panel.
+export type PanelProfessional = { id: string; name: string; specialty: string };
+export type PanelBooking = {
+	id: string;
+	professionalId: string;
+	serviceName: string;
+	customerName: string;
+	customerEmail: string;
+	localStart: string;
+	localEnd: string;
+	status: "Held" | "Confirmed";
+	viaAssistant: boolean;
+};
+export type PanelCalendar = { from: string; days: number; timeZone: string; professionals: PanelProfessional[]; bookings: PanelBooking[] };
+export type TraceStep = {
+	turn: number;
+	ordinal: number;
+	kind: "Model" | "Tool";
+	tool: string | null;
+	input: string | null;
+	output: string | null;
+	latencyMs: number;
+	inputTokens: number;
+	outputTokens: number;
+	costUsd: number;
+};
+export type BookingTrace = {
+	bookingId: string;
+	conversationId: string;
+	transcript: { role: "customer" | "assistant"; text: string }[];
+	steps: TraceStep[];
+	costUsd: number;
+};
+
 export type InboxItem = { id: string; bookingId: string; subject: string; body: string; receivedAt: string };
 
 // RFC 9457 with the API's stable code (docs/errors.md) and, on a taken slot, the nearest free starts.
@@ -116,5 +150,10 @@ export const api = {
 	cancelMine: (id: string) => call<Booking>(`/v1/businesses/${BUSINESS_ID}/me/bookings/${id}/cancel`, { method: "POST" }),
 	moveMine: (id: string, start: string) =>
 		call<Hold>(`/v1/businesses/${BUSINESS_ID}/me/bookings/${id}/reschedule`, { method: "POST", body: JSON.stringify({ start }) }),
+	panelSignIn: (key: string) => call<void>(`/v1/businesses/${BUSINESS_ID}/panel/sign-in`, { method: "POST", body: JSON.stringify({ key }) }),
+	panelSignOut: () => call<void>(`/v1/businesses/${BUSINESS_ID}/panel/sign-out`, { method: "POST" }),
+	panelCalendar: (from: string, days: number) => call<PanelCalendar>(`/v1/businesses/${BUSINESS_ID}/panel/calendar?from=${from}&days=${days}`),
+	panelTrace: (id: string) => call<BookingTrace>(`/v1/businesses/${BUSINESS_ID}/panel/bookings/${id}/trace`),
+	panelCancel: (id: string) => call<Booking>(`/v1/businesses/${BUSINESS_ID}/panel/bookings/${id}/cancel`, { method: "POST" }),
 	inbox: () => call<InboxItem[]>(`/v1/businesses/${BUSINESS_ID}/me/inbox`),
 };

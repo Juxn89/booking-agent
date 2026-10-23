@@ -4,6 +4,7 @@ using BookingAgent.Application.Abstractions;
 using BookingAgent.Application.Common;
 using BookingAgent.Application.Features.Availability;
 using BookingAgent.Application.Features.Notifications;
+using BookingAgent.Application.Features.Panel;
 using BookingAgent.Domain;
 using BookingAgent.Domain.Bookings;
 using BookingAgent.Domain.Catalog;
@@ -54,9 +55,13 @@ internal sealed class AvailabilitySource(BookingDbContext db, IClock clock) : IA
 	}
 }
 
-/// <summary>Bookings and customers on EF Core; the database's refusals become the application's exceptions.</summary>
+/// <summary>
+/// Bookings and customers on EF Core; the database's refusals become the application's exceptions, and saved
+/// changes are announced to the business's panel.
+/// </summary>
 /// <param name="db">The database.</param>
-internal sealed class BookingRepository(BookingDbContext db) : IBookingRepository
+/// <param name="calendar">The panel's live updates.</param>
+internal sealed class BookingRepository(BookingDbContext db, ICalendarUpdates calendar) : IBookingRepository
 {
 	public Task<Booking?> FindTrackedAsync(BookingId id, CancellationToken cancellationToken) =>
 		db.Bookings.AsTracking().FirstOrDefaultAsync(b => b.Id == id, cancellationToken);
@@ -104,6 +109,12 @@ internal sealed class BookingRepository(BookingDbContext db) : IBookingRepositor
 			.ToList();
 		db.Notifications.AddRange(changed.SelectMany(static booking => booking.Changes).SelectMany(NotificationPlanner.Plan));
 
+		// Every new or changed booking, held ones included: the panel shows holds too.
+		var touched = db.ChangeTracker.Entries<Booking>()
+			.Where(static entry => entry.State is EntityState.Added or EntityState.Modified)
+			.Select(static entry => (entry.Entity.Id.Value, entry.Entity.ProfessionalId))
+			.ToList();
+
 		try
 		{
 			await SaveSerializedAsync(cancellationToken).ConfigureAwait(false);
@@ -123,6 +134,26 @@ internal sealed class BookingRepository(BookingDbContext db) : IBookingRepositor
 		foreach (var booking in changed)
 		{
 			booking.ClearChanges();
+		}
+
+		await AnnounceAsync(touched, cancellationToken).ConfigureAwait(false);
+	}
+
+	private async Task AnnounceAsync(List<(Guid Booking, ProfessionalId Professional)> touched, CancellationToken cancellationToken)
+	{
+		if (touched.Count == 0)
+		{
+			return;
+		}
+
+		var professionals = touched.Select(static t => t.Professional).Distinct().ToList();
+		var businessOf = await db.Professionals.AsNoTracking()
+			.Where(p => professionals.Contains(p.Id))
+			.ToDictionaryAsync(static p => p.Id, static p => p.BusinessId, cancellationToken)
+			.ConfigureAwait(false);
+		foreach (var group in touched.GroupBy(t => businessOf[t.Professional]))
+		{
+			await calendar.PublishAsync(group.Key, [.. group.Select(static t => t.Booking)], cancellationToken).ConfigureAwait(false);
 		}
 	}
 

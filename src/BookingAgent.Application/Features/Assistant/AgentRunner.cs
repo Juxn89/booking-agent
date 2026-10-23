@@ -82,6 +82,7 @@ public static class AssistantErrors
 /// <param name="catalog">The business's catalog.</param>
 /// <param name="clock">The clock.</param>
 /// <param name="options">Limits and prices.</param>
+/// <param name="calendar">The panel's live updates.</param>
 public sealed class AgentRunner(
 	IChatClient chat,
 	AgentTurn turn,
@@ -89,7 +90,8 @@ public sealed class AgentRunner(
 	IConversationStore conversations,
 	ICatalogReader catalog,
 	IClock clock,
-	IOptions<AssistantOptions> options)
+	IOptions<AssistantOptions> options,
+	Panel.ICalendarUpdates calendar)
 {
 	/// <summary>Said when the conversation's money runs out mid-reply, instead of a reply.</summary>
 	public const string OutOfBudgetReply =
@@ -193,6 +195,12 @@ public sealed class AgentRunner(
 		catch (ConversationBusyException)
 		{
 			return Error.Conflict(AssistantErrors.Busy, "Another message of this conversation was answered at the same time; send yours again.");
+		}
+
+		// The panel heard about the holds when they were saved, before the steps that show the assistant made them.
+		if (turn.Holds.Count > 0)
+		{
+			await calendar.PublishAsync(data.Business.Id, [.. turn.Holds.Select(static h => h.HoldId)], cancellationToken).ConfigureAwait(false);
 		}
 
 		return new AssistantReply(conversation.Id, reply, turn.Holds, turn.Cancellations, turn.SignInRequested);

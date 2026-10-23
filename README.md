@@ -45,6 +45,11 @@ So far:
   Signed in, customers see, move and cancel their appointments, in the page or by asking the assistant. The
   assistant only proposes: a cancellation is a card with its own button, a move a hold to confirm
   ([ADR 0006](docs/adr/0006-customers-sign-in-with-an-emailed-code.md)).
+- **The business's panel** (`/panel`): each professional's week, held and confirmed, updated live over SignalR the
+  moment a booking is held, confirmed, moved, cancelled or released. Bookings made with the assistant are marked,
+  and open on their "why": the conversation and every model and tool call, with time, tokens and cost. It opens
+  with the staff's access key (`PANEL_ACCESS_KEY` in `.env`), into a sealed HttpOnly cookie
+  ([ADR 0007](docs/adr/0007-the-panel-live-over-signalr.md)).
 - **Booking form** (`/reservar`): service, professional, day and time, then the held slot with a countdown and a
   Confirmar button. It calls the same API as the assistant will. The inbox, behind the sign-in, is at `/bandeja`.
 - **Demo data:** "Clínica Demo" in Managua with three professionals and five services, seeded in Development.
@@ -52,7 +57,7 @@ So far:
 
 ```bash
 (cd web && pnpm install)                            # once
-cp .env.template .env                               # once; add an Anthropic key for the assistant (optional)
+cp .env.template .env                               # once; an Anthropic key for the assistant, a panel key (optional)
 dotnet run --project src/BookingAgent.AppHost       # Postgres, Mailpit (http://localhost:8030), API and web (http://localhost:3020)
 dotnet test                                         # domain, application, architecture and integration (needs Docker)
 dotnet run --project evals/BookingAgent.Evals -- run oracle   # the evals' harness (needs Docker)

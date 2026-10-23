@@ -101,3 +101,21 @@ one visitor.
 
 ### signin-unavailable
 `signin.unavailable` · 503. The code could not be emailed. Ask again in a minute.
+
+## Panel
+
+### panel-not_configured
+`panel.not_configured` · 503. The API has no panel access key (`Panel:AccessKey`; locally `PANEL_ACCESS_KEY` in
+`.env`). The panel stays closed.
+
+### panel-invalid_key
+`panel.invalid_key` · 401. Not the panel's access key.
+
+### panel-required
+`panel.required` · 401. Sign in to the panel first: no session cookie, or it expired (8 hours).
+
+### panel-bad_range
+`panel.bad_range` · 400. `from` is a plain ISO date, and `days` is 1 to 31.
+
+### panel-not_found
+`panel.not_found` · 404. No such business, or, for a trace, the assistant did not make that booking.

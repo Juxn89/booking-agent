@@ -8,6 +8,7 @@ using BookingAgent.Application.Features.Bookings;
 using BookingAgent.Application.Features.Catalog;
 using BookingAgent.Application.Features.Customers;
 using BookingAgent.Application.Features.Notifications;
+using BookingAgent.Application.Features.Panel;
 using BookingAgent.Infrastructure.Ai;
 using BookingAgent.Infrastructure.Notifications;
 using BookingAgent.Infrastructure.Persistence;
@@ -15,6 +16,7 @@ using BookingAgent.Infrastructure.Processing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using NodaTime;
 
@@ -58,6 +60,10 @@ public static class DependencyInjection
 		services.AddScoped<ISignInCodeSender, SmtpSignInCodeSender>();
 		services.AddScoped<ISignInStore, SignInStore>();
 		services.AddScoped<IMyBookingsReader, MyBookingsReader>();
+		services.AddScoped<IPanelReader, PanelReader>();
+
+		// The API replaces it with the SignalR hub; other hosts announce nothing.
+		services.TryAddSingleton<ICalendarUpdates, NoCalendarUpdates>();
 		services.AddScoped<INotificationChannel, InAppChannel>();
 
 		services.AddScoped<FindAvailableSlots>();
@@ -73,6 +79,8 @@ public static class DependencyInjection
 		services.AddScoped<VerifySignInCode>();
 		services.AddScoped<CustomerSessions>();
 		services.AddScoped<ListMyBookings>();
+		services.AddScoped<GetPanelCalendar>();
+		services.AddScoped<GetBookingTrace>();
 
 		// The assistant: the bare model once per app (keyed, so tests can swap it), the tool loop and the meter per
 		// request around the request's turn.
