@@ -16,6 +16,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NodaTime;
 using NodaTime.Serialization.SystemTextJson;
 using NodaTime.Testing;
+using NodaTime.Text;
 using static ScriptedChatClient;
 
 // The business's panel over HTTP: the access key, the calendar, the steps behind an assistant's booking, cancelling,
@@ -33,7 +34,14 @@ public sealed class PanelTests(PostgresFixture fixture) : IAsyncLifetime, IAsync
 		Converters = { new JsonStringEnumConverter() },
 	}.ConfigureForNodaTime(DateTimeZoneProviders.Tzdb);
 
-	private static readonly Instant NineMonday = Instant.FromUtc(2026, 11, 2, 15, 0);
+	private static readonly DateTimeZone Managua = DateTimeZoneProviders.Tzdb[DemoData.Zone];
+
+	// The API runs on the real clock, so the Monday is a week ahead of it rather than a fixed date: a hold made on a
+	// fixed past day has run out by the time the panel reads it.
+	private static readonly LocalDate Monday =
+		SystemClock.Instance.GetCurrentInstant().InZone(Managua).Date.Next(IsoDayOfWeek.Monday).PlusWeeks(1);
+
+	private static readonly Instant NineMonday = Managua.AtStrictly(Monday.At(new LocalTime(9, 0))).ToInstant();
 
 	private readonly WebApplicationFactory<Program> _api = fixture.Api.WithWebHostBuilder(static host => host.UseSetting("Panel:AccessKey", Key));
 
@@ -73,7 +81,7 @@ public sealed class PanelTests(PostgresFixture fixture) : IAsyncLifetime, IAsync
 	[Fact]
 	public async Task The_calendar_shows_the_week_marks_the_assistants_bookings_and_shows_their_steps()
 	{
-		// The assistant holds Monday 9:00 for Ana (a scripted model on a fixed clock, on the same database).
+		// The assistant holds Monday 9:00 for Ana (a scripted model, on the same database, with the clock frozen at now).
 		var model = new ScriptedChatClient(
 			_ => Call("hold_slot", new()
 			{
@@ -85,7 +93,7 @@ public sealed class PanelTests(PostgresFixture fixture) : IAsyncLifetime, IAsync
 				["customer_phone"] = null,
 			}),
 			_ => Say("Te aparté las 9:00."));
-		await using (var services = fixture.Services(new FakeClock(Instant.FromUtc(2026, 11, 1, 12, 0)), model))
+		await using (var services = fixture.Services(new FakeClock(SystemClock.Instance.GetCurrentInstant()), model))
 		await using (var scope = services.CreateAsyncScope())
 		{
 			await scope.ServiceProvider.GetRequiredService<AgentRunner>()
@@ -93,11 +101,11 @@ public sealed class PanelTests(PostgresFixture fixture) : IAsyncLifetime, IAsync
 		}
 
 		using var client = await SignedInAsync();
-		var calendar = (await client.GetFromJsonAsync<PanelCalendar>($"{Panel}/calendar?from=2026-11-02&days=7", Json))!;
+		var calendar = (await client.GetFromJsonAsync<PanelCalendar>($"{Panel}/calendar?from={LocalDatePattern.Iso.Format(Monday)}&days=7", Json))!;
 
 		Assert.Equal(3, calendar.Professionals.Count);
 		var booking = Assert.Single(calendar.Bookings);
-		Assert.Equal((BookingStatus.Held, true, "Ana Pérez", new LocalDateTime(2026, 11, 2, 9, 0)), (booking.Status, booking.ViaAssistant, booking.CustomerName, booking.LocalStart));
+		Assert.Equal((BookingStatus.Held, true, "Ana Pérez", Monday.At(new LocalTime(9, 0))), (booking.Status, booking.ViaAssistant, booking.CustomerName, booking.LocalStart));
 
 		var trace = (await client.GetFromJsonAsync<BookingTrace>($"{Panel}/bookings/{booking.Id}/trace", Json))!;
 		Assert.Equal(["customer", "assistant"], trace.Transcript.Select(static m => m.Role));

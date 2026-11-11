@@ -35,11 +35,12 @@
 	</ItemGroup>
 
 	<ItemGroup Label="Hosting and observability">
-		<PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.12" />
-		<PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="10.0.12" />
-		<PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.12" />
-		<PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.12" />
-		<PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.12" />
+		<!-- 10.0.14 (25 Oct): the minimum Aspire 13.6.5 needs (11 Nov 2026); 10.0.15 is from 10 Nov. -->
+		<PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.14" />
+		<PackageVersion Include="Microsoft.Extensions.Options.DataAnnotations" Version="10.0.14" />
+		<PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.14" />
+		<PackageVersion Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.14" />
+		<PackageVersion Include="Microsoft.Extensions.Hosting.Abstractions" Version="10.0.14" />
 		<PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.10.0" />
 		<PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.10.0" />
 		<!-- OpenTelemetry 1.20.x is from 20-21 Oct. -->
@@ -72,15 +73,17 @@
 		<PackageVersion Include="Microsoft.Extensions.AI.Abstractions" Version="10.10.1" />
 	</ItemGroup>
 
-	<!-- The AppHost SDK version (13.6.1, 7 Oct 2026) is in the AppHost project file; 13.6.2 and 13.6.3 are newer. -->
+	<!-- The AppHost SDK version (13.6.5, a security exception explained below) is in the AppHost project file. -->
 	<ItemGroup Label="Aspire">
-		<PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="13.6.1" />
-		<PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.6.1" />
 		<!--
-			Transitive pin: Aspire.Hosting 13.6.1 brings MessagePack 2.5.302, vulnerable to GHSA-qhrr-8q5h-9q3h, and
-			NuGet audit fails the restore on it. 2.5.307 (3 Oct 2026) is the newest eligible patch on the 2.x line.
+			Security exception to the two-week rule (11 Nov 2026): CVE-2026-120006 (GHSA-f7vh-h5g3-7jrh, high, 10 Nov)
+			affects Aspire.Hosting and Aspire.Hosting.AppHost below 13.6.5: the dashboard's auth cookie can reach a
+			linked container, which can replay it and run code as the developer (macOS). The SDK and these
+			integrations move to the fix, 13.6.5 (10 Nov), which becomes an ordinary version on 24 Nov. It brings
+			MessagePack 2.5.307 itself, so the transitive pin for GHSA-qhrr-8q5h-9q3h is gone.
 		-->
-		<PackageVersion Include="MessagePack" Version="2.5.307" />
+		<PackageVersion Include="Aspire.Hosting.PostgreSQL" Version="13.6.5" />
+		<PackageVersion Include="Aspire.Hosting.JavaScript" Version="13.6.5" />
 	</ItemGroup>
 
 	<!--

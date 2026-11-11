@@ -13,10 +13,12 @@ env:
   DOTNET_NOLOGO: true
   DOTNET_CLI_TELEMETRY_OPTOUT: true
 
+# Pinned to ubuntu-24.04: ubuntu-latest moved to 26.04, and Playwright has no Chromium build for it yet
+# (checked up to 1.65.0 on 11 Nov 2026). Go back to ubuntu-latest once it has one.
 jobs:
   build:
     name: Build, format & tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -35,7 +37,7 @@ jobs:
 
   web:
     name: Web (lint, types, build)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: web
@@ -60,7 +62,7 @@ jobs:
 
   e2e:
     name: End-to-end (Playwright)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # The real API (notifications, sign-in codes, panel, SignalR) and web app against Postgres and Mailpit; the
     # assistant plays a script (web/e2e/fixtures/assistant-script.json), so this job needs no key and costs nothing.
     services:
